@@ -25,6 +25,8 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 ## Requirements
 
 * Ubuntu
+* Python 3.7
+* Anaconda
 * PyTorch (>=1.1) 
 * Cuda (>=10.0) & Cudnn (>=7.0)
 * mmdet 1.0rc (from https://github.com/open-mmlab/mmdetection.git)
@@ -51,21 +53,30 @@ Click the picture to Download one of them or click [Here(Google)](https://drive.
 ## Installation
 * clone this repo
 * git clone https://github.com/open-mmlab/mmdetection.git
-* install mmdetection: please follow the guidence in its github
+## Install mmdetection:
 ```bash
+$ git clone https://github.com/open-mmlab/mmdetection.git
+$ conda create -n open-mmlab python=3.7 -y
+$ conda activate open-mmlab
+$ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch
 $ cd mmdetection
-$ pip install -r requirements/build.txt
-$ pip install "git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI"
+$ git checkout tags/v1.0rc
+$ pip install -r requirements.txt
+$ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
 $ pip list | grep mmdet
+
 ```
 * Download [test set](http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip)
 ```bash
+$ cd FeatureFlow
+$ wget http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip
 $ unzip vimeo_interp_test.zip
 $ cd vimeo_interp_test
 $ mkdir sequences
 $ cp target/* sequences/ -r
 $ cp input/* sequences/ -r
+$rm -rf vimeo_interp_test.zip
 ```
 * Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
 ```
