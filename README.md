@@ -59,6 +59,7 @@ $ git clone https://github.com/open-mmlab/mmdetection.git
 $ conda create -n open-mmlab python=3.7 -y
 $ conda activate open-mmlab
 $ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch
+$ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
 $ cd mmdetection
 $ git checkout tags/v1.0rc
 $ pip install -r requirements.txt
