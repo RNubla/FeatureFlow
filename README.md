@@ -76,9 +76,8 @@ $ cd vimeo_interp_test
 $ mkdir sequences
 $ cp target/* sequences/ -r
 $ cp input/* sequences/ -r
-$rm -rf vimeo_interp_test.zip
+$ rm -rf vimeo_interp_test.zip
 ```
-* Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
 ```
 $ pip install scikit-image visdom tqdm prefetch-generator
 ```
@@ -91,6 +90,7 @@ Place FeFlow.ckpt to ./checkpoints/.
 ## Pre-trained Model
 [Google Drive](https://drive.google.com/file/d/1CmDMypSlLM6EAvOt5yjwUQ7O5w-xCm1n/view)
 
+* Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
 
 ## Download Results
 
