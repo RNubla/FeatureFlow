@@ -82,14 +82,15 @@ $rm -rf vimeo_interp_test.zip
 ```
 $ pip install scikit-image visdom tqdm prefetch-generator
 ```
-
-## Pre-trained Model
-
+## Checkpoint
 [Google Drive](https://drive.google.com/open?id=1S8C0chFV6Bip6W9lJdZkog0T3xiNxbEx)
 
 [Baidu Cloud](https://pan.baidu.com/s/1LxVw-89f3GX5r0mZ6wmsJw): ae4x
 
 Place FeFlow.ckpt to ./checkpoints/.
+## Pre-trained Model
+[Google Drive](https://drive.google.com/file/d/1CmDMypSlLM6EAvOt5yjwUQ7O5w-xCm1n/view)
+
 
 ## Download Results
 
