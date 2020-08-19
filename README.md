@@ -9,6 +9,11 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 ## To Do List
 - [x] Preprint
 - [x] Training code
+- [] High Resolution Mode For Video 1280x720 and Up
+    - [] Split video into 4 sections and each section must be 640x360
+    - [] Merge each 4 sections into one video file
+- [] Remane output file
+- [] Change output file location
 
 ## Table of Contents
 
@@ -58,17 +63,18 @@ Click the picture to Download one of them or click [Here(Google)](https://drive.
 $ git clone https://github.com/open-mmlab/mmdetection.git
 $ conda create -n open-mmlab python=3.7 -y
 $ conda activate open-mmlab
-$ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch
-$ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge
+$ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch -y
+$ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge -y
 $ cd mmdetection
-$ git checkout tags/v1.0rc
+$ git checkout tags/v1.0rc1
 $ pip install -r requirements.txt
 $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
 $ pip list | grep mmdet
+$ pip install scikit-image visdom tqdm prefetch-generator
 
 ```
-* Download [test set](http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip)
+<!-- * Download [test set](http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip)
 ```bash
 $ cd FeatureFlow
 $ wget http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip
@@ -78,10 +84,7 @@ $ mkdir sequences
 $ cp target/* sequences/ -r
 $ cp input/* sequences/ -r
 $ rm -rf vimeo_interp_test.zip
-```
-```
-$ pip install scikit-image visdom tqdm prefetch-generator
-```
+``` -->
 ## Checkpoint
 [Google Drive](https://drive.google.com/open?id=1S8C0chFV6Bip6W9lJdZkog0T3xiNxbEx)
 
@@ -91,7 +94,7 @@ Place FeFlow.ckpt to ./checkpoints/.
 ## Pre-trained Model
 [Google Drive](https://drive.google.com/file/d/1CmDMypSlLM6EAvOt5yjwUQ7O5w-xCm1n/view)
 
-* Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
+Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
 
 ## Download Results
 

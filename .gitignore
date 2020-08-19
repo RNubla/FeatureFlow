@@ -1,5 +1,9 @@
 .idea/**
 log/**
 .vscode
+output.mp4
+input/**
+src/__pychache__
+*.pyc
 checkpoints/**
 models/bdcn/final-model/**
