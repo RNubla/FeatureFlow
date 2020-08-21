@@ -20,3 +20,8 @@ ffmpeg -i berlin-decimate.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:oh"
 crop bottom right
 ffmpeg -i berlin-decimate.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:oh" berlin-bottom-right.mp4
 
+decimated crop
+ffmpeg -i berlin.mp4 -vsync 0 -frame_pts true -vf "mpdecimate,crop=iw/2:ih/2:0:0" berlin-decimated-top-left.mp4
+
+combine all 4 
+ffmpeg -i berlin.mp4top-left.mp4 -i berlin.mp4top-right.mp4 -i berlin.mp4bottom-left.mp4 -i berlin.mp4bottom-right.mp4 -filter_complex "[0:v][1:v]hstack=inputs=2[top];[2:v][3:v]hstack=inputs=2[bottom];[top][bottom]vstack=inputs=2[v]" -map "[v]" output.mp4

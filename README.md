@@ -9,6 +9,7 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 ## To Do List
 - [x] Preprint
 - [x] Training code
+- [ ] Remove Duplicate Frames
 - [ ] High Resolution Mode For Video 1280x720 and Up
     - [ ] Split video into 4 sections and each section must be 640x360
     - [ ] Merge each 4 sections into one video file

@@ -34,6 +34,7 @@ parser.add_argument('--video_path', type=str, required=True)
 parser.add_argument('--t_interp', type=int, default=4, help='times of interpolating')
 parser.add_argument('--fps', type=int, default=-1, help='specify the fps.')
 parser.add_argument('--slow_motion', action='store_true', help='using this flag if you want to slow down the video and maintain fps.')
+# parser.add_argument('--high_res', action='store_true', help='use this flag if file has a resolution greater than 630x360')
 
 args = parser.parse_args()
 
@@ -140,7 +141,7 @@ def main():
         print('processing iter' + str(i+1) + ', ' + str((i+1)*frame_count) + ' frames in total')
         filenames = os.listdir(dir_path)
         filenames.sort()
-        for i in range(0, len(filenames) - 1):
+        for i in tqdm(range(0, len(filenames) - 1)):
             arguments_strFirst = os.path.join(dir_path, filenames[i])
             arguments_strSecond = os.path.join(dir_path, filenames[i + 1])
             index1 = int(re.sub("\D", "", filenames[i]))
@@ -220,6 +221,7 @@ def main():
         output_fps = args.fps
     else:
         output_fps = fps if args.slow_motion else args.t_interp*fps
+    # if args.high_res:
     os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
     os.system("rm -rf %s" % dir_path)
 
