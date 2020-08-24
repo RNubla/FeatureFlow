@@ -7,6 +7,3 @@ src/__pychache__
 *.pyc
 checkpoints/**
 models/bdcn/final-model/**
-output/berlin/top-left.mp4
-output/berlin-final-02.mp4
-output/berlin-final.mp4

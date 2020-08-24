@@ -12,10 +12,14 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 - [x] Remove Duplicate Frames
 - [x] High Resolution Mode For Video 1280x720
     - [x] Split video into 4 sections and each section must be 640x360
+    - [ ] Allow for video auto detect of resolution.
+        - [ ] If resolution is 640x360, split video would not be run
 - [x] Remane output file
 - [x] Change output file location
-- [ ] Refactor for paths to work with Windows
-- [ ] Change terminal commands to work with Windows
+- [x] Refactor for paths to work with Windows
+- [x] Change terminal commands to work with Windows
+- [ ] Create UI using PyQt
+
 
 ## Table of Contents
 
