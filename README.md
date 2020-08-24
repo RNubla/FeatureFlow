@@ -70,10 +70,10 @@ $ git clone https://github.com/open-mmlab/mmdetection.git
 $ conda create -n open-mmlab python=3.7 -y
 $ conda activate open-mmlab
 $ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch -y
-$ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge -y
+$ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge -y   # windows conda install -c groakat x264 ffmpeg=4.0.2 -c conda-forge -y
 $ cd mmdetection
 $ git checkout tags/v1.0rc1
-$ pip install -r requirements.txt
+$ pip install -r requirements.txt         #windows use pycocotools-windows  
 $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
 $ pip list | grep mmdet
