@@ -12,6 +12,7 @@ from tqdm import tqdm
 import numpy as np
 import math
 import models.bdcn.bdcn as bdcn
+import shutil
 
 # For parsing commandline arguments
 def str2bool(v):
@@ -100,7 +101,8 @@ def IndexHelper(i, digit):
 def VideoToSequence(path, time):
     video = cv2.VideoCapture(path)
     dir_path = 'frames_tmp'
-    os.system("rm -rf %s" % dir_path)
+    # os.system("rm -rf %s" % dir_path)
+    # shutil.rmtree(dir_path)
     os.mkdir(dir_path)
     fps = int(video.get(cv2.CAP_PROP_FPS))
     length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -112,7 +114,9 @@ def VideoToSequence(path, time):
             break
         i = i + 1
         index = IndexHelper(i*time, len(str(time*length)))
-        cv2.imwrite(dir_path + '/' + index + '.png', frame)
+        # cv2.imwrite(dir_path + '/' + index + '.png', frame)
+        leading_zeroes = str(index).zfill(10)
+        cv2.imwrite(dir_path + '/' + leading_zeroes + '.png', frame)
         # print(index)
     return [dir_path, length, fps]
 
@@ -148,7 +152,7 @@ def main():
             index2 = int(re.sub("\D", "", filenames[i + 1]))
             index = int((index1 + index2) / 2)
             arguments_strOut = os.path.join(dir_path,
-                                            IndexHelper(index, len(str(args.t_interp * frame_count))) + ".png")
+                                            IndexHelper(index, len(str(args.t_interp * frame_count).zfill(10))) + ".png")
 
             # print(arguments_strFirst)
             # print(arguments_strSecond)
@@ -222,8 +226,11 @@ def main():
     else:
         output_fps = fps if args.slow_motion else args.t_interp*fps
     # if args.high_res:
-    os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
-    os.system("rm -rf %s" % dir_path)
+    # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
+    # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "\\*.png' -pix_fmt yuv420p output.mp4")
+    os.system("ffmpeg -f image2 -framerate " + str(output_fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    # os.system("rm -rf %s" % dir_path)
+    shutil.rmtree(dir_path)
 
 
 main()

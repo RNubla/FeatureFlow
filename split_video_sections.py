@@ -88,7 +88,8 @@ class HighRes:
         print('INTERP TOP LEFT')
         top_left_file = str(self.top_left_dir / 'decimated-top-left.mp4')
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
-        os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
+        # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
+        os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
 
         print("!!!CWD OUTPUT")
         print(cwd_output_file)
@@ -104,7 +105,8 @@ class HighRes:
         print('INTERP TOP RIGHT')
         top_right_file = str(self.top_right_dir / 'decimated-top-right.mp4')
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
-        os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
+        # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
+        os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
         # MOVE
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         time.sleep(5)
@@ -117,7 +119,8 @@ class HighRes:
         print('INTERP BOTTOM LEFT')
         bottom_left_file = str(self.bottom_left_dir / 'decimated-bottom-left.mp4')
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
-        os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
+        # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
+        os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         time.sleep(5)
         
@@ -127,15 +130,16 @@ class HighRes:
         
         # BOTTOM RIGHT
         print('INTERP BOTTOM RIGHT')
-        bottom_right_file = str(self.bottom_right_dir / 'decimated-bottom-left.mp4')
+        bottom_right_file = str(self.bottom_right_dir / 'decimated-bottom-right.mp4')
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
-        os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
+        # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
+        os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         
         time.sleep(5)
         print('RENAME')
-        print(str(self.output_file_dir / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'bottom-left.mp4')
-        os.rename(str(self.output_file_dir / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'bottom-left.mp4')
+        print(str(self.output_file_dir / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'bottom-right.mp4')
+        os.rename(str(self.output_file_dir / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'bottom-right.mp4')
 
 
 
@@ -168,7 +172,7 @@ class HighRes:
 #%%
 
 #%%
-split = HighRes('berlin.mp4', '2')
+split = HighRes('lego.mp4', '2')
 #%%
 
 #%%
