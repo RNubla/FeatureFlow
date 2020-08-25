@@ -169,31 +169,31 @@ class HighRes:
         os.remove(decimated_file)
         shutil.rmtree(self.output_file_dir)
         
-#%%
+# #%%
 
-#%%
-split = HighRes('lego.mp4', '2')
-#%%
+# #%%
+# split = HighRes('lego.mp4', '2')
+# #%%
 
-#%%
-split.create_dir()
-#%%
+# #%%
+# split.create_dir()
+# #%%
 
-#%%
-split.remove_dup_frames()
-#%%
+# #%%
+# split.remove_dup_frames()
+# #%%
 
-#%%
-split.run_splitter()
-#%%
+# #%%
+# split.run_splitter()
+# #%%
 
-#%%
-split.run_feature_flow()
+# #%%
+# split.run_feature_flow()
 
-#%%
-split.stitch_sections()
-#%%
+# #%%
+# split.stitch_sections()
+# #%%
 
-#%%
-split.delete_files()
-#%%
+# #%%
+# split.delete_files()
+# #%%
