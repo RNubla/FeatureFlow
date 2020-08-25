@@ -7,19 +7,19 @@ A state-of-the-art Video Frame Interpolation Method using deep semantic flows bl
 FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEEE Conference on Computer Vision and Pattern Recognition 2020)
 
 ## To Do List
+
 - [x] Preprint
 - [x] Training code
 - [x] Remove Duplicate Frames
 - [x] High Resolution Mode For Video 1280x720
-    - [x] Split video into 4 sections and each section must be 640x360
-    - [ ] Allow for video auto detect of resolution.
-        - [ ] If resolution is 640x360, split video would not be run
+  - [x] Split video into 4 sections and each section must be 640x360
+  - [ ] Allow for video auto detect of resolution.
+    - [ ] If resolution is 640x360, split video would not be run
 - [x] Remane output file
 - [x] Change output file location
 - [x] Refactor for paths to work with Windows
 - [x] Change terminal commands to work with Windows
 - [ ] Create UI using PyQt
-
 
 ## Table of Contents
 
@@ -35,14 +35,14 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 
 ## Requirements
 
-* Ubuntu
-* Python 3.7
-* Anaconda
-* PyTorch (>=1.1) 
-* Cuda (>=10.0) & Cudnn (>=7.0)
-* mmdet 1.0rc (from https://github.com/open-mmlab/mmdetection.git)
-* visdom (not necessary)
-* NVIDIA GPU
+- Ubuntu
+- Python 3.7
+- Anaconda
+- PyTorch (>=1.1)
+- Cuda (>=10.0) & Cudnn (>=7.0)
+- mmdet 1.0rc (from https://github.com/open-mmlab/mmdetection.git)
+- visdom (not necessary)
+- NVIDIA GPU
 
 ## Video demos
 
@@ -62,9 +62,12 @@ Click the picture to Download one of them or click [Here(Google)](https://drive.
 [<img width="320" height="180" src="https://github.com/CM-BF/FeatureFlow/blob/master/data/figures/SYA_2.png"/>](https://github.com/CM-BF/storage/tree/master/videos/SYA_2.mp4 "video7")
 
 ## Installation
-* clone this repo
-* git clone https://github.com/open-mmlab/mmdetection.git
+
+- clone this repo
+- git clone https://github.com/open-mmlab/mmdetection.git
+
 ## Install mmdetection:
+
 ```bash
 $ git clone https://github.com/open-mmlab/mmdetection.git
 $ conda create -n open-mmlab python=3.7 -y
@@ -73,13 +76,15 @@ $ conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch -y
 $ conda install x264=='1!152.20180717' ffmpeg=4.0.2 -c conda-forge -y   # windows conda install -c groakat x264 ffmpeg=4.0.2 -c conda-forge -y
 $ cd mmdetection
 $ git checkout tags/v1.0rc1
-$ pip install -r requirements.txt         #windows use pycocotools-windows  
+$ pip install -r requirements.txt         #windows use pycocotools-windows
 $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
 $ pip list | grep mmdet
 $ pip install scikit-image visdom tqdm prefetch-generator
-
+$ conda install -c conda-forge pygobject -y
+$ conda install -c conda-forge gtk3 -y
 ```
+
 <!-- * Download [test set](http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip)
 ```bash
 $ cd FeatureFlow
@@ -91,13 +96,17 @@ $ cp target/* sequences/ -r
 $ cp input/* sequences/ -r
 $ rm -rf vimeo_interp_test.zip
 ``` -->
+
 ## Checkpoint
+
 [Google Drive](https://drive.google.com/open?id=1S8C0chFV6Bip6W9lJdZkog0T3xiNxbEx)
 
 [Baidu Cloud](https://pan.baidu.com/s/1LxVw-89f3GX5r0mZ6wmsJw): ae4x
 
 Place FeFlow.ckpt to ./checkpoints/.
+
 ## Pre-trained Model
+
 [Google Drive](https://drive.google.com/file/d/1CmDMypSlLM6EAvOt5yjwUQ7O5w-xCm1n/view)
 
 Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn/final-model/
@@ -109,17 +118,20 @@ Download BDCN's pre-trained model:bdcn_pretrained_on_bsds500.pth to ./model/bdcn
 [Baidu Cloud](https://pan.baidu.com/s/1BaJJ82nSKagly6XZ8KNtAw): pc0k
 
 ## Evaluation
+
 ```bash
 $ CUDA_VISIBLE_DEVICES=0 python eval_Vimeo90K.py --checkpoint ./checkpoints/FeFlow.ckpt --dataset_root ~/datasets/videos/vimeo_interp_test --visdom_env test --vimeo90k --imgpath ./results/
 ```
 
 ## Test your video
+
 ```bash
 $ CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ./yourvideo.mp4 --t_interp 4 --slow_motion
 ```
+
 `--t_interp` sets frame multiples, only power of 2(2,4,8...) are supported. Use flag `--slow_motion` to slow down the video which maintains the original fps.
 
-The output video will be saved as output.mp4 in your working diractory. 
+The output video will be saved as output.mp4 in your working diractory.
 
 ## Training
 
@@ -129,13 +141,14 @@ Training Code **train.py** is available now. I can't run it for comfirmation now
 $ CUDA_VISIBLE_DEVICES=0,1 python train.py <arguments>
 ```
 
-* Please read the **arguments' help** carefully to fully control the **two-step training**.
-* Pay attention to the `--GEN_DE` which is the flag to set the model to Stage-I or Stage-II.
-* 2 GPUs is necessary for training or the small batch\_size will cause training process crash.
-* Deformable CNN is not stable enough so that you may face training crash sometimes(I didn't fix the random seed), but it can be detected soon after the beginning of running by visualizing results using Visdom. 
-* Visdom visualization codes[line 75, 201-216 and 338-353] are included which is good for viewing training process and checking crash.
+- Please read the **arguments' help** carefully to fully control the **two-step training**.
+- Pay attention to the `--GEN_DE` which is the flag to set the model to Stage-I or Stage-II.
+- 2 GPUs is necessary for training or the small batch_size will cause training process crash.
+- Deformable CNN is not stable enough so that you may face training crash sometimes(I didn't fix the random seed), but it can be detected soon after the beginning of running by visualizing results using Visdom.
+- Visdom visualization codes[line 75, 201-216 and 338-353] are included which is good for viewing training process and checking crash.
 
 ## Citation
+
 ```
 @InProceedings{Gui_2020_CVPR,
 author = {Gui, Shurui and Wang, Chaoyue and Chen, Qihua and Tao, Dacheng},
@@ -147,7 +160,9 @@ year = {2020}
 ```
 
 ## Contact
+
 [Shurui Gui](mailto:citrinegui@gmail.com); [Chaoyue Wang](mailto:chaoyue.wang@sydney.edu.au)
 
 ## License
+
 See [MIT License](https://github.com/CM-BF/FeatureFlow/blob/master/LICENSE)
