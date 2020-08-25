@@ -19,7 +19,7 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 - [x] Change output file location
 - [x] Refactor for paths to work with Windows
 - [x] Change terminal commands to work with Windows
-- [ ] Create UI using PyQt
+- [ ] Create UI using TKinter
 
 ## Table of Contents
 
