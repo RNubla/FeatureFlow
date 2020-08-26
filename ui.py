@@ -3,7 +3,7 @@ import tkinter.filedialog as fdialog
 from tkinter.ttk import Progressbar
 import os
 from pathlib import Path
-from split_video_sections import HighRes
+from split_video_sections import HighResVideos
 
 class Application:
     def __init__(self):
@@ -62,7 +62,7 @@ class Application:
         print(self.video_file)
     
     def start_interp(self):
-        interp = HighRes((self.video_file), self.interp_number.get())
+        interp = HighResVideos((self.video_file), self.interp_number.get())
         interp.create_dir()
         interp.remove_dup_frames()
         interp.run_splitter()
