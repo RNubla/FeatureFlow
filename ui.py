@@ -35,12 +35,24 @@ class Application:
 
         start_btn = Button(self.root, text='Start Interpolation', command=self.start_interp)
         start_btn.grid(row=0, column=3)
+
+        outputBtn = Button(self.root, text='Output', command=self.choose_output)
+        self.output_path_label = Label(self.root)
+
+        outputBtn.grid(row=1, column=0)
+        self.output_path_label.grid(row=1, column=1)
         
 
         progress_bar = Progressbar(self.root, orient= HORIZONTAL, length = 100, mode = 'determinate')
 
     # def bar(self):
         
+    def choose_output(self):
+        cwd = os.getcwd()
+        output_dir = Path(cwd + '/output')
+        self.save_folder = fdialog.askdirectory(initialdir = output_dir)
+        self.output_path_label.config(text=self.save_folder)
+        print(self.save_folder)
 
     def open_video(self):
         cwd = os.getcwd()
