@@ -13,13 +13,15 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 - [x] Remove Duplicate Frames
 - [x] High Resolution Mode For Video 1280x720
   - [x] Split video into 4 sections and each section must be 640x360
-  - [ ] Allow for video auto detect of resolution.
+  - [x] Allow for video auto detect of resolution.
     - [ ] If resolution is 640x360, split video would not be run
 - [x] Remane output file
 - [x] Change output file location
 - [x] Refactor for paths to work with Windows
 - [x] Change terminal commands to work with Windows
-- [ ] Create UI using TKinter
+- [x] Create UI using wxPython
+- [x] Added Multi-Thread so GUI would not freeze
+- [ ] Add Progress Bar GUI
 
 ## Table of Contents
 
@@ -81,8 +83,6 @@ $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
 $ pip install scikit-image visdom tqdm prefetch-generator
 $ pip list | grep mmdet
-$ conda install -c conda-forge pygobject -y
-$ conda install -c conda-forge gtk3 -y
 ```
 
 ## Building File !!(WARNING: If when building, dont use conda to install packages. Use pip for torchvision and pytorch)
@@ -99,9 +99,15 @@ $ git checkout tags/v1.0rc1
 $ pip install -r requirements.txt     # windows use pycocotools-windows
 $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
-$ pip install scikit-image visdom tqdm prefetch-generator
+$ pip install scikit-image visdom tqdm prefetch-generator wxPython
 
 
+```
+
+## BUILD
+
+```bash
+$ pyinstaller feature_flow_ui.py --distpath D:\Programming\Python\FeatureFlow-Build -n FeatureFlow-App -y --clean
 ```
 
 ## Checkpoint
