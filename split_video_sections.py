@@ -3,10 +3,88 @@ import os , shutil, time, sys, errno
 from os import pipe
 from pathlib import Path
 from sequence_run import main
+# from videoprops import get_video_properties
+import cv2
 
-class HighRes:
 
-    def __init__(self, file_name, interpolation):
+class CheckResolution:
+    def __init__(self, file_name):
+        self.file = file_name
+        self.vcap = cv2.VideoCapture(self.file)
+    
+    def getWidth(self):
+        width = self.vcap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        return int(width)
+
+    def getHeight(self):
+        height = self.vcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        return int(height)
+
+class Resolution360P:
+    def __init__(self, file_name, interpolation, output_path_from_gui):
+        self.current_working_dir = ''
+        self.file = file_name
+        self.interp_num = interpolation
+        self.input_dir = ''
+        self.dir_name_based_off_filename = os.path.splitext(self.file)[0]
+        self.path_to_dir_name_based_off_filename = ''
+        self.output_dir_name_based_off_filename = ''
+        self.output_path = output_path_from_gui
+        
+
+    def createDir(self):
+        self.current_working_dir = Path.cwd()
+        self.input_dir = self.current_working_dir
+        self.path_to_dir_name_based_off_filename = self.input_dir / self.dir_name_based_off_filename
+        
+        self.output_dir = Path(self.output_path + '/output/')
+        self.output_dir_name_based_off_filename = self.output_dir / self.dir_name_based_off_filename
+
+        # Path(self.input_dir /self.path_to_dir_name_based_off_filename).mkdir(parents=True, exist_ok=True)
+        # Path(self.output_dir_name_based_off_filename).mkdir(parents=True, exist_ok=True)
+
+    def removeDupFrames(self):
+        filename = self.dir_name_based_off_filename
+        file = self.path_to_dir_name_based_off_filename / filename
+        print(file)
+        print('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        os.system('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+
+    def runFeatureFlow(self):
+        interpolation_num = self.interp_num
+        filename = self.dir_name_based_off_filename
+        cwd = Path(self.current_working_dir)
+        cwd_output_file = cwd / 'output.mp4'
+        # TOP LEFT
+        print('INTERP TOP LEFT')
+        file = str(filename + '-decimated.mp4')
+        # print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + file + ' --t_interp ' + str(interpolation_num))
+        main(interpolation_num, file)
+
+        
+        print('RENAME')
+        # print(str(self.output_path / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'top-left.mp4')
+        # os.rename(Path(self.output_path) / 'output.mp4', Path(self.output_path) / 'final-' + str(filename) + '.mp4')
+        os.rename(cwd_output_file, str(Path(self.output_path) / filename) + '-final.mp4')
+    
+        print("!!!CWD OUTPUT")
+        renamed_file = str(Path(self.output_path) / filename) + '-final.mp4'
+        print(cwd_output_file)
+        print(str(self.output_path))
+        shutil.move(str(renamed_file), str(self.output_path))
+        time.sleep(5)
+
+    def deleteFiles(self):
+        cwd = Path(self.current_working_dir)
+        filename = self.dir_name_based_off_filename
+        cwd_decimated_file = cwd / str(filename + '-decimated.mp4')
+        # decimated_file = str(Path(self.input_dir / filename)) + '-decimated.mp4'
+        print(cwd_decimated_file)
+        os.remove(cwd_decimated_file)
+
+class Resolution720P:
+
+    def __init__(self, file_name, interpolation, output_path_from_gui):
         self.file_name = file_name
         self.interpolation = int(interpolation)
         self.input_dir = ''
@@ -19,7 +97,9 @@ class HighRes:
         self.output_file_dir = ''
         self.current_working_dir = ''
         self.filename_dir = ''
-        self.model_dir = './models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth'
+        # self.model_dir = './models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth'
+        # self.model_dir = '.\\models\\bdcn\\final-model\\bdcn_pretrained_on_bsds500.pth'
+        self.output_path = output_path_from_gui
 
         if self.interpolation % 2 != 0:
             # print('Use the power of two for interpolation')
@@ -36,7 +116,8 @@ class HighRes:
         self.bottom_left_dir = self.filename_dir / 'bottom-left'
         self.bottom_right_dir = self.filename_dir / 'bottom-right'
 
-        self.output_dir = Path(self.current_working_dir + '/output/')
+        # self.output_dir = Path(self.current_working_dir + '/output/')
+        self.output_dir = Path(self.output_path + '/output/')
         self.output_file_dir = self.output_dir / self.file_dir_name
         
         Path(self.output_file_dir).mkdir(parents=True, exist_ok=True)
@@ -92,7 +173,9 @@ class HighRes:
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
         # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
         # os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_left_file + ' --t_interp ' + str(interpolation_num))
-        main(int(interpolation_num), str(self.model_dir) ,'checkpoints/FeFlow.ckpt', top_left_file)
+        # main(interpolation_num, str(self.model_dir) ,'checkpoints/FeFlow.ckpt', top_left_file)
+        # print(interpolation_num)
+        main(interpolation_num, top_left_file)
 
         print("!!!CWD OUTPUT")
         print(cwd_output_file)
@@ -110,7 +193,8 @@ class HighRes:
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
         # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
         # os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + top_right_file + ' --t_interp ' + str(interpolation_num))
-        main(int(interpolation_num), str(self.model_dir) ,'checkpoints/FeFlow.ckpt', top_right_file)
+        # main(interpolation_num, str(self.model_dir) ,'checkpoints/FeFlow.ckpt', top_right_file)
+        main(interpolation_num, top_right_file)
         # MOVE
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         time.sleep(5)
@@ -125,7 +209,8 @@ class HighRes:
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
         # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
         # os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_left_file + ' --t_interp ' + str(interpolation_num))
-        main(int(interpolation_num), str(self.model_dir)  ,'checkpoints/FeFlow.ckpt', bottom_left_file)
+        # main(interpolation_num, str(self.model_dir)  ,'checkpoints/FeFlow.ckpt', bottom_left_file)
+        main(interpolation_num, bottom_left_file)
 
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         time.sleep(5)
@@ -140,7 +225,8 @@ class HighRes:
         print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
         # os.system('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
         # os.system('set CUDA_VISIBLE_DEVICES= 0 & python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + bottom_right_file + ' --t_interp ' + str(interpolation_num))
-        main(int(interpolation_num), str(self.model_dir)  ,'checkpoints/FeFlow.ckpt', bottom_right_file)
+        # main(interpolation_num, str(self.model_dir)  ,'checkpoints/FeFlow.ckpt', bottom_right_file)
+        main(interpolation_num, bottom_right_file)
         shutil.move(str(cwd_output_file), str(self.output_file_dir))
         
         time.sleep(5)
@@ -204,3 +290,4 @@ class HighRes:
 # #%%
 # split.delete_files()
 # #%%
+# %%
