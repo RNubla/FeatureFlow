@@ -25,19 +25,19 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--checkpoint", type=str, help='path of checkpoint for pretrained model')
-parser.add_argument('--feature_level', type=int, default=3, help='Using feature_level=? in GEN, Default:3')
-parser.add_argument('--bdcn_model', type=str, default='./models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth')
-parser.add_argument('--DE_pretrained', action='store_true', help='using this flag if training the model from pretrained parameters.')
-parser.add_argument('--DE_ckpt', type=str, help='path to DE checkpoint')
-parser.add_argument('--video_path', type=str, required=True)
-parser.add_argument('--t_interp', type=int, default=4, help='times of interpolating')
-parser.add_argument('--fps', type=int, default=-1, help='specify the fps.')
-parser.add_argument('--slow_motion', action='store_true', help='using this flag if you want to slow down the video and maintain fps.')
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--checkpoint", type=str, help='path of checkpoint for pretrained model')
+# parser.add_argument('--feature_level', type=int, default=3, help='Using feature_level=? in GEN, Default:3')
+# parser.add_argument('--bdcn_model', type=str, default='./models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth')
+# parser.add_argument('--DE_pretrained', action='store_true', help='using this flag if training the model from pretrained parameters.')
+# parser.add_argument('--DE_ckpt', type=str, help='path to DE checkpoint')
+# parser.add_argument('--video_path', type=str, required=True)
+# parser.add_argument('--t_interp', type=int, default=4, help='times of interpolating')
+# parser.add_argument('--fps', type=int, default=-1, help='specify the fps.')
+# parser.add_argument('--slow_motion', action='store_true', help='using this flag if you want to slow down the video and maintain fps.')
 # parser.add_argument('--high_res', action='store_true', help='use this flag if file has a resolution greater than 630x360')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
 
 def _pil_loader(path, cropArea=None, resizeDim=None, frameFlip=0):
@@ -58,7 +58,8 @@ def _pil_loader(path, cropArea=None, resizeDim=None, frameFlip=0):
 
 bdcn = bdcn.BDCN()
 bdcn.cuda()
-structure_gen = layers.StructureGen(feature_level=args.feature_level)
+# structure_gen = layers.StructureGen(feature_level=args.feature_level)
+structure_gen = layers.StructureGen(3)
 structure_gen.cuda()
 detail_enhance = layers.DetailEnhance()
 detail_enhance.cuda()
@@ -120,15 +121,18 @@ def VideoToSequence(path, time):
         # print(index)
     return [dir_path, length, fps]
 
-def main():
+def main(interp, model, checkpoint, input_file):
     # initial
-    iter = math.log(args.t_interp, int(2))
+    # iter = math.log(args.t_interp, int(2))
+    iter = math.log(interp, int(2))
     if iter%1:
         print('the times of interpolating must be power of 2!!')
         return
     iter = int(iter)
-    bdcn.load_state_dict(torch.load('%s' % (args.bdcn_model)))
-    dict1 = torch.load(args.checkpoint)
+    # bdcn.load_state_dict(torch.load('%s' % (args.bdcn_model)))
+    bdcn.load_state_dict(torch.load('%s' % (model)))
+    # dict1 = torch.load(args.checkpoint)
+    dict1 = torch.load(checkpoint)
     structure_gen.load_state_dict(dict1['state_dictGEN'], strict=False)
     detail_enhance.load_state_dict(dict1['state_dictDE'], strict=False)
 
@@ -139,7 +143,8 @@ def main():
     IE = 0
     PSNR = 0
     count = 0
-    [dir_path, frame_count, fps] = VideoToSequence(args.video_path, args.t_interp)
+    # [dir_path, frame_count, fps] = VideoToSequence(args.video_path, args.t_interp)
+    [dir_path, frame_count, fps] = VideoToSequence(input_file, interp)
 
     for i in range(iter):
         print('processing iter' + str(i+1) + ', ' + str((i+1)*frame_count) + ' frames in total')
@@ -152,7 +157,8 @@ def main():
             index2 = int(re.sub("\D", "", filenames[i + 1]))
             index = int((index1 + index2) / 2)
             arguments_strOut = os.path.join(dir_path,
-                                            IndexHelper(index, len(str(args.t_interp * frame_count).zfill(10))) + ".png")
+                                            # IndexHelper(index, len(str(args.t_interp * frame_count).zfill(10))) + ".png")
+                                            IndexHelper(index, len(str(interp * frame_count).zfill(10))) + ".png")
 
             # print(arguments_strFirst)
             # print(arguments_strSecond)
@@ -221,18 +227,21 @@ def main():
         # IE = IE / count
         # PSNR = PSNR / count
         # print('Average IE/PSNR:', IE, PSNR)
-    if args.fps != -1:
-        output_fps = args.fps
-    else:
-        output_fps = fps if args.slow_motion else args.t_interp*fps
+    # if args.fps != -1:
+    #     output_fps = args.fps
+    # else:
+    #     # output_fps = fps if args.slow_motion else args.t_interp*fps
+        # output_fps = fps if args.slow_motion else interp*fps
     # if args.high_res:
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "\\*.png' -pix_fmt yuv420p output.mp4")
-    os.system("ffmpeg -f image2 -framerate " + str(output_fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    # os.system("ffmpeg -f image2 -framerate " + str(output_fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    os.system("ffmpeg -f image2 -framerate " + str(-1) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    # os.system("ffmpeg -f image2 -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("rm -rf %s" % dir_path)
     shutil.rmtree(dir_path)
 
 
-main()
+# main()
 
 
