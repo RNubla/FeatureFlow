@@ -79,23 +79,30 @@ $ git checkout tags/v1.0rc1
 $ pip install -r requirements.txt         #windows use pycocotools-windows
 $ pip install mmcv
 $ pip install -v -e .  # or "python setup.py develop"
-$ pip list | grep mmdet
 $ pip install scikit-image visdom tqdm prefetch-generator
+$ pip list | grep mmdet
 $ conda install -c conda-forge pygobject -y
 $ conda install -c conda-forge gtk3 -y
 ```
 
-<!-- * Download [test set](http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip)
+## Building File !!(WARNING: If when building, dont use conda to install packages. Use pip for torchvision and pytorch)
+
 ```bash
-$ cd FeatureFlow
-$ wget http://data.csail.mit.edu/tofu/testset/vimeo_interp_test.zip
-$ unzip vimeo_interp_test.zip
-$ cd vimeo_interp_test
-$ mkdir sequences
-$ cp target/* sequences/ -r
-$ cp input/* sequences/ -r
-$ rm -rf vimeo_interp_test.zip
-``` -->
+$ conda create -n open-mmlab python=3.7 -y
+$ conda activate open-mmlab
+$ conda install cudatoolkit=10.0 -c pytorch -y
+$ pip install https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-win_amd64.whl #pytorch 1.1.0
+$ pip install torchvision==0.2.2.post3
+$ conda install -c groakat x264 ffmpeg=4.0.2 -c conda-forge -y
+$ cd mmdetection
+$ git checkout tags/v1.0rc1
+$ pip install -r requirements.txt     # windows use pycocotools-windows
+$ pip install mmcv
+$ pip install -v -e .  # or "python setup.py develop"
+$ pip install scikit-image visdom tqdm prefetch-generator
+
+
+```
 
 ## Checkpoint
 
