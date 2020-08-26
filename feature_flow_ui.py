@@ -2,6 +2,7 @@ import wx
 import wx.adv
 import os
 from split_video_sections import CheckResolution, Resolution720P, Resolution360P
+import threading
 
 
 class MainWindow(wx.Frame):
@@ -97,6 +98,7 @@ class MainWindow(wx.Frame):
         resolution = CheckResolution(self.input_file)
         print(self.input_file)
         print(resolution.getWidth())
+        print(resolution.getHeight())
         interp_val_from_TextCtrl = int(float(self.interpolation_num_TextCtrl.GetValue()))
 
         if resolution.getWidth() < int(720) and resolution.getHeight() < int(1280):  
@@ -106,16 +108,22 @@ class MainWindow(wx.Frame):
             interp.runFeatureFlow()
             interp.deleteFiles()
             self.completeDialog()
-        if resolution.getWidth() == int(720) and resolution.getHeight() == int(1280):
-            interp = Resolution720P(self.input_file_dir, interp_val_from_TextCtrl, self.output_path)
+
+        # else resolution.getWidth() == int(720) and resolution.getHeight() == int(1280):
+        else:
+            interp720 = Resolution720P(self.input_file_dir, interp_val_from_TextCtrl, self.output_path)
             print(self.interpolation_num_TextCtrl.GetValue())
-            interp.create_dir()
-            interp.remove_dup_frames()
-            interp.run_splitter()
-            interp.run_feature_flow()
-            interp.stitch_sections()
-            interp.delete_files()
+            interp720.create_dir()
+            interp720.remove_dup_frames()
+            interp720.run_splitter()
+            interp720.run_feature_flow()
+            interp720.stitch_sections()
+            interp720.delete_files()
             self.completeDialog()
+    
+    def thread_start(self, event):
+        thread = threading.Thread(target=self.onRunInterp, args=(event,))
+        thread.start()
 
     def completeDialog(self):
         wx.MessageBox('Feature Flow has finished interpolating your video. \n Check your output directory', 
@@ -214,7 +222,8 @@ class MainWindow(wx.Frame):
         RunButton = wx.Button(panel, label="Run")
         sizer.Add(RunButton, pos=(7, 4), span=(1, 1),
             flag=wx.BOTTOM|wx.RIGHT, border=10)
-        RunButton.Bind(wx.EVT_BUTTON, self.onRunInterp)
+        # RunButton.Bind(wx.EVT_BUTTON, self.onRunInterp)
+        RunButton.Bind(wx.EVT_BUTTON, self.thread_start)
 
         sizer.AddGrowableCol(2)
 
