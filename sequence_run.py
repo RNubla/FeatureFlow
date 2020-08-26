@@ -1,4 +1,5 @@
 # SeDraw
+from pathlib import Path
 import re
 import argparse
 import os
@@ -121,7 +122,13 @@ def VideoToSequence(path, time):
         # print(index)
     return [dir_path, length, fps]
 
-def main(interp, model, checkpoint, input_file):
+def main(interp:int, input_file):
+    cwd = Path(__file__).resolve()
+    model_file = cwd.parent / 'models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth'
+    checkpoint_file = cwd.parent / 'checkpoints/FeFlow.ckpt'
+    print(model_file)
+    print(model_file.exists())
+    print('INTERP: ',interp)
     # initial
     # iter = math.log(args.t_interp, int(2))
     iter = math.log(interp, int(2))
@@ -130,9 +137,10 @@ def main(interp, model, checkpoint, input_file):
         return
     iter = int(iter)
     # bdcn.load_state_dict(torch.load('%s' % (args.bdcn_model)))
-    bdcn.load_state_dict(torch.load('%s' % (model)))
+    # bdcn.load_state_dict(torch.load('%s' % (model)))
+    bdcn.load_state_dict(torch.load(model_file))
     # dict1 = torch.load(args.checkpoint)
-    dict1 = torch.load(checkpoint)
+    dict1 = torch.load(checkpoint_file)
     structure_gen.load_state_dict(dict1['state_dictGEN'], strict=False)
     detail_enhance.load_state_dict(dict1['state_dictDE'], strict=False)
 
@@ -236,7 +244,7 @@ def main(interp, model, checkpoint, input_file):
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "\\*.png' -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -f image2 -framerate " + str(output_fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
-    os.system("ffmpeg -f image2 -framerate " + str(-1) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    os.system("ffmpeg -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -f image2 -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("rm -rf %s" % dir_path)
     shutil.rmtree(dir_path)
