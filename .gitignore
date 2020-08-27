@@ -9,3 +9,5 @@ checkpoints/**
 models/bdcn/final-model/**
 build/
 FeatureFlow-App.spec
+ffmpeg/
+FeatureFlow-One-App.spec
