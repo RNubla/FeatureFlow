@@ -21,6 +21,7 @@ FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEE
 - [x] Change terminal commands to work with Windows
 - [x] Create UI using wxPython
 - [x] Added Multi-Thread so GUI would not freeze
+  - [ ] Add multo-thread for splitting videos and stitching videos
 - [ ] Add Progress Bar GUI
 
 ## Table of Contents
@@ -107,7 +108,7 @@ $ pip install scikit-image visdom tqdm prefetch-generator wxPython
 ## BUILD
 
 ```bash
-$ pyinstaller feature_flow_ui.py --distpath D:\Programming\Python\FeatureFlow-Build -n FeatureFlow-App -y --clean
+$ pyinstaller feature_flow_ui.py --distpath D:\Programming\Python\FeatureFlow-Build -n FeatureFlow-App -y --clean --add-data .\checkpoints\FeFlow.ckpt;.\checkpoints\ --add-data .\models\bdcn\final-model\bdcn_pretrained_on_bsds500.pth;.\models\bdcn\final-model\ --add-binary .\ffmpeg\bin\ffmpeg.exe;.
 ```
 
 ## Checkpoint
