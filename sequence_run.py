@@ -15,6 +15,8 @@ import math
 import models.bdcn.bdcn as bdcn
 import shutil
 
+ffmpeg_exe = Path().cwd() / 'ffmpeg.exe'
+
 # For parsing commandline arguments
 def str2bool(v):
     if isinstance(v, bool):
@@ -244,7 +246,8 @@ def main(interp:int, input_file):
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "/*.png' -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -framerate " + str(output_fps) + " -pattern_type glob -i '" + dir_path + "\\*.png' -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -f image2 -framerate " + str(output_fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
-    os.system("ffmpeg -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    # os.system("ffmpeg -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    os.system(str(ffmpeg_exe) + " -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -f image2 -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("rm -rf %s" % dir_path)
     shutil.rmtree(dir_path)

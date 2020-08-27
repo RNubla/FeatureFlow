@@ -3,9 +3,9 @@ import os , shutil, time, sys, errno
 from os import pipe
 from pathlib import Path
 from sequence_run import main
-# from videoprops import get_video_properties
 import cv2
 
+ffmpeg_exe = Path().cwd() / 'ffmpeg.exe'
 
 class CheckResolution:
     def __init__(self, file_name):
@@ -47,8 +47,9 @@ class Resolution360P:
         filename = self.dir_name_based_off_filename
         file = self.path_to_dir_name_based_off_filename / filename
         print(file)
-        print('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
-        os.system('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        print('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        # os.system('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        os.system(str(ffmpeg_exe) + ' -i '+ str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
 
     def runFeatureFlow(self):
         interpolation_num = self.interp_num
@@ -134,31 +135,32 @@ class Resolution720P:
         file = self.input_dir / filename
         print(file)
         print('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
-        os.system('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        # os.system('ffmpeg -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        os.system(str(ffmpeg_exe) + ' -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
     
     def run_splitter(self):
         filename = self.file_dir_name
         file = str(self.input_dir / filename)    # /cwd/input/filename
 
         top_left_dir = str(self.top_left_dir)
-        os.system('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:0" ' + top_left_dir + '/' +'decimated-top-left.mp4')
+        os.system(str(ffmpeg_exe) + ' -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:0" ' + top_left_dir + '/' +'decimated-top-left.mp4')
         print('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:0" ' + top_left_dir + '/' +'decimated-top-left.mp4')
 
         # remove top right
         top_right_dir = str(self.top_right_dir)
-        os.system('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:0" ' + top_right_dir + '/' +'decimated-top-right.mp4')
+        os.system(str(ffmpeg_exe) + ' -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:0" ' + top_right_dir + '/' +'decimated-top-right.mp4')
         print('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:0" ' + top_right_dir + '/' +'decimated-top-right.mp4')
         
 
         # remove bottom left
         bottom_left_dir = str(self.bottom_left_dir)
-        os.system('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:oh" ' + bottom_left_dir + '/' +'decimated-bottom-left.mp4')
+        os.system(str(ffmpeg_exe) + ' -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:oh" ' + bottom_left_dir + '/' +'decimated-bottom-left.mp4')
         print('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:0:oh" ' + bottom_left_dir + '/' +'decimated-bottom-left.mp4')
         
 
         # remove bottom right
         bottom_right_dir = str(self.bottom_right_dir)
-        os.system('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:oh" ' + bottom_right_dir + '/' +'decimated-bottom-right.mp4')
+        os.system(str(ffmpeg_exe) + ' -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:oh" ' + bottom_right_dir + '/' +'decimated-bottom-right.mp4')
         print('ffmpeg -i ' + file + '-decimated.mp4 -vsync 0 -frame_pts true -vf "crop=iw/2:ih/2:ow:oh" ' + bottom_right_dir + '/' +'decimated-bottom-right.mp4')
         
     
@@ -239,13 +241,13 @@ class Resolution720P:
 
     def stitch_sections(self):
         filename = self.file_dir_name
-        os.system('ffmpeg -i ' + str(self.output_file_dir / 'top-left.mp4') +
+        os.system(str(ffmpeg_exe) + ' -i ' + str(self.output_file_dir / 'top-left.mp4') +
                         ' -i ' + str(self.output_file_dir / 'top-right.mp4') + 
                         ' -i ' + str(self.output_file_dir / 'bottom-left.mp4') + 
                         ' -i ' + str(self.output_file_dir / 'bottom-right.mp4') + 
                         ' -filter_complex "[0:v][1:v]hstack=inputs=2[top];[2:v][3:v]hstack=inputs=2[bottom];[top][bottom]vstack=inputs=2[v]" -map "[v]" ' + 
                         str(self.output_dir / filename) + '-final.mp4')
-        print(('ffmpeg -i ' + str(self.output_file_dir / 'top-left.mp4') +
+        print((str(ffmpeg_exe) + ' -i ' + str(self.output_file_dir / 'top-left.mp4') +
                         ' -i ' + str(self.output_file_dir / 'top-right.mp4') + 
                         ' -i ' + str(self.output_file_dir / 'bottom-left.mp4') + 
                         ' -i ' + str(self.output_file_dir / 'bottom-right.mp4') + 
