@@ -49,7 +49,7 @@ class Resolution360P:
         print(file)
         print('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
         # os.system('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
-        os.system(str(ffmpeg_exe) + ' -i '+ str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        # os.system(str(ffmpeg_exe) + ' -i '+ str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
 
     def runFeatureFlow(self):
         interpolation_num = self.interp_num
@@ -58,7 +58,8 @@ class Resolution360P:
         cwd_output_file = cwd / 'output.mp4'
         # TOP LEFT
         print('INTERP TOP LEFT')
-        file = str(filename + '-decimated.mp4')
+        # file = str(filename + '-decimated.mp4')
+        file = str(filename + '.mp4')
         # print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + file + ' --t_interp ' + str(interpolation_num))
         main(interpolation_num, file)
 
