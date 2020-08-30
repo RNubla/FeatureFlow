@@ -102,11 +102,11 @@ class MainWindow(wx.Frame):
         interp_val_from_TextCtrl = int(float(self.interpolation_num_TextCtrl.GetValue()))
 
         if resolution.getWidth() < int(720) and resolution.getHeight() < int(1280):  
-            interp = Resolution360P(self.input_file_dir, interp_val_from_TextCtrl, self.output_path)
-            interp.createDir()
-            interp.removeDupFrames()
+            interp = Resolution360P(self.input_file, interp_val_from_TextCtrl, self.output_path)
+            # interp.createDir()
+            # interp.removeDupFrames()
             interp.runFeatureFlow()
-            interp.deleteFiles()
+            # interp.deleteFiles()
             self.completeDialog()
 
         # else resolution.getWidth() == int(720) and resolution.getHeight() == int(1280):
