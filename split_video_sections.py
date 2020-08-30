@@ -2,6 +2,8 @@
 import os , shutil, time, sys, errno
 from os import pipe
 from pathlib import Path
+
+from numpy.core.arrayprint import str_format
 from sequence_run import main
 import cv2
 
@@ -21,60 +23,35 @@ class CheckResolution:
         return int(height)
 
 class Resolution360P:
-    def __init__(self, file_name, interpolation, output_path_from_gui):
-        self.current_working_dir = ''
-        self.file = file_name
-        self.interp_num = interpolation
-        self.input_dir = ''
-        self.dir_name_based_off_filename = os.path.splitext(self.file)[0]
-        self.path_to_dir_name_based_off_filename = ''
-        self.output_dir_name_based_off_filename = ''
-        self.output_path = output_path_from_gui
-        
+    def __init__(self, file_input_path_from_gui : str, interpolation : int, output_path_from_gui : str):
+        self.current_working_dir : str = Path.cwd()
+        self.input_video : str = file_input_path_from_gui
+        self.file_name : str = os.path.splitext(file_input_path_from_gui)[0]   # returns file name from example.mp4 to example
+        self.interp_num : int = interpolation 
+        self.output_path : str = output_path_from_gui
 
-    def createDir(self):
-        self.current_working_dir = Path.cwd()
-        self.input_dir = self.current_working_dir
-        self.path_to_dir_name_based_off_filename = self.input_dir / self.dir_name_based_off_filename
-        
-        self.output_dir = Path(self.output_path + '/output/')
-        self.output_dir_name_based_off_filename = self.output_dir / self.dir_name_based_off_filename
-
-        # Path(self.input_dir /self.path_to_dir_name_based_off_filename).mkdir(parents=True, exist_ok=True)
-        # Path(self.output_dir_name_based_off_filename).mkdir(parents=True, exist_ok=True)
+        self.finished_file_name : str = Path.cwd() / str(self.file_name + '-final.mp4')
+        self.interp_output_file_name : str = Path.cwd() / 'output.mp4'
 
     def removeDupFrames(self):
-        filename = self.dir_name_based_off_filename
-        file = self.path_to_dir_name_based_off_filename / filename
-        print(file)
-        print('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        # filename = self.dir_name_based_off_filename
+        # file = self.path_to_dir_name_based_off_filename / filename
+        # print(file)
+        print('ffmpeg.exe  -qscale 0 -i ' + str(self.file_name) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
         # os.system('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
         # os.system(str(ffmpeg_exe) + ' -i '+ str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
 
     def runFeatureFlow(self):
-        interpolation_num = self.interp_num
-        filename = self.dir_name_based_off_filename
-        cwd = Path(self.current_working_dir)
-        cwd_output_file = cwd / 'output.mp4'
         # TOP LEFT
-        print('INTERP TOP LEFT')
-        # file = str(filename + '-decimated.mp4')
-        file = str(filename + '.mp4')
+        print(self.interp_num)
+        print('Input Video: ',(self.input_video))
         # print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + file + ' --t_interp ' + str(interpolation_num))
-        main(interpolation_num, file)
+        main(self.interp_num, self.input_video)
 
-        
-        print('RENAME')
-        # print(str(self.output_path / 'output.mp4'), cwd / 'output' / self.file_dir_name /  'top-left.mp4')
-        # os.rename(Path(self.output_path) / 'output.mp4', Path(self.output_path) / 'final-' + str(filename) + '.mp4')
-        os.rename(cwd_output_file, str(Path(self.output_path) / filename) + '-final.mp4')
-    
-        print("!!!CWD OUTPUT")
-        renamed_file = str(Path(self.output_path) / filename) + '-final.mp4'
-        print(cwd_output_file)
-        print(str(self.output_path))
-        shutil.move(str(renamed_file), str(self.output_path))
-        time.sleep(5)
+        print(Path(self.interp_output_file_name) / Path(self.output_path))
+
+        time.sleep(3)
+        shutil.move('output.mp4', Path(self.interp_output_file_name) / Path(self.output_path))
 
     def deleteFiles(self):
         cwd = Path(self.current_working_dir)
@@ -264,33 +241,3 @@ class Resolution720P:
         shutil.rmtree(self.filename_dir)
         os.remove(decimated_file)
         shutil.rmtree(self.output_file_dir)
-
-# #%%
-
-# #%%
-# split = HighRes('lego.mp4', '2')
-# #%%
-
-# #%%
-# split.create_dir()
-# #%%
-
-# #%%
-# split.remove_dup_frames()
-# #%%
-
-# #%%
-# split.run_splitter()
-# #%%
-
-# #%%
-# split.run_feature_flow()
-
-# #%%
-# split.stitch_sections()
-# #%%
-
-# #%%
-# split.delete_files()
-# #%%
-# %%
