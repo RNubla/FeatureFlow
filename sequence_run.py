@@ -14,6 +14,8 @@ import numpy as np
 import math
 import models.bdcn.bdcn as bdcn
 import shutil
+# from feature_flow_ui import progressBar
+# from wx.lib.pubsub import Publisher
 
 ffmpeg_exe = Path().cwd() / 'ffmpeg.exe'
 
@@ -124,6 +126,36 @@ def VideoToSequence(path, time):
         # print(index)
     return [dir_path, length, fps]
 
+iter : int = 0
+filenames : str = None
+interpoIndex : int = 0
+# interpoRange : int = len(filenames) -1
+interpoRange : int = 0
+
+
+
+def setIteration(iteration : int ) -> int:
+    global iter
+    iter = iteration
+
+def setInterpolationIndex(interpolation : int) -> int:
+    global interpoIndex
+    interpoIndex = interpolation
+
+def setInterpolationRange(interpolationRange : int) -> int:
+    global interpoRange
+    interpoRange = interpolationRange
+
+
+def getIteration() -> int:
+    return iter
+
+def getInterpolationIndex() -> int:
+    return interpoIndex
+
+def getInterpolationRange():
+    return interpoRange
+
 def main(interp : int, input_file : str):
     cwd = Path(__file__).resolve()
     model_file = cwd.parent / 'models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth'
@@ -158,9 +190,21 @@ def main(interp : int, input_file : str):
 
     for i in range(iter):
         print('processing iter' + str(i+1) + ', ' + str((i+1)*frame_count) + ' frames in total')
+        # print('Iteration: ',iter)
+        setIteration(iter)
         filenames = os.listdir(dir_path)
         filenames.sort()
-        for i in tqdm(range(0, len(filenames) - 1)):
+        # for i in tqdm(range(0, len(filenames) - 1)):
+        # print('Filename: ', filenames)
+        # interpoRange : int = len(filenames) - 1
+        setInterpolationRange(len(filenames) -1)
+        # print('InterpoRange: ', interpoRange)
+        for i in tqdm(range(0, getInterpolationRange())):
+            # global interpoIndex
+            # interpoIndex = i
+            setInterpolationIndex(i)
+            # progressBar(getInterpolationIndex())
+            # print('InterpoIndex: ', interpoIndex)
             arguments_strFirst = os.path.join(dir_path, filenames[i])
             arguments_strSecond = os.path.join(dir_path, filenames[i + 1])
             index1 = int(re.sub("\D", "", filenames[i]))
@@ -216,6 +260,7 @@ def main(interp : int, input_file : str):
                 0).cpu().numpy()  # [:, intPaddingTop:intPaddingTop+intHeight, intPaddingLeft: intPaddingLeft+intWidth]
             imgt_png = np.uint8(((imgt_np + 1.0) / 2.0).transpose(1, 2, 0)[:, :, ::-1] * 255)
             cv2.imwrite(arguments_strOut, imgt_png)
+            # wx.CallAfter(Publisher().sendMessage, 'update', '')
 
             # rec_rgb = np.array(_pil_loader('%s/%s' % (triple_path, 'SeDraw.png')))
             # gt_rgb = np.array(_pil_loader('%s/%s' % (triple_path, args.gt)))
