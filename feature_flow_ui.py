@@ -1,8 +1,13 @@
+from sys import flags
 import wx
 import wx.adv
+from wx.core import DefaultSpan
+import wx.lib.agw.pygauge as pb
 import os
-from split_video_sections import CheckResolution, Resolution720P, Resolution360P
+from split_video_sections import CheckResolution, Resolution720p, Resolution360p
 import threading
+from sequence_run import getInterpolationRange, getInterpolationIndex, getIteration
+# from wx.lib.pubsub import Publisher
 
 
 class MainWindow(wx.Frame):
@@ -17,6 +22,10 @@ class MainWindow(wx.Frame):
         self.input_file_dir = ''
         self.input_file = ''
         self.output_path = ''
+        self.pbar = None
+
+        # self.pbar = wx.Gauge(self, range=getInterpolationRange(), size = (100, 25), style =  wx.GA_HORIZONTAL)
+        # sizer.Add(self.pbar,pos=(7,0), span=(1,6), flag=wx.EXPAND|wx.ALL, border=5)
 
     def OnQuit(self, e):
         self.Close()
@@ -102,7 +111,7 @@ class MainWindow(wx.Frame):
         interp_val_from_TextCtrl = int(float(self.interpolation_num_TextCtrl.GetValue()))
 
         if resolution.getWidth() < int(720) and resolution.getHeight() < int(1280):  
-            interp = Resolution360P(self.input_file, interp_val_from_TextCtrl, self.output_path)
+            interp = Resolution360p(self.input_file, interp_val_from_TextCtrl, self.output_path)
             # interp.createDir()
             # interp.removeDupFrames()
             interp.runFeatureFlow()
@@ -111,23 +120,25 @@ class MainWindow(wx.Frame):
 
         # else resolution.getWidth() == int(720) and resolution.getHeight() == int(1280):
         else:
-            interp720 = Resolution720P(self.input_file_dir, interp_val_from_TextCtrl, self.output_path)
+            interp720 = Resolution720p(self.input_file, interp_val_from_TextCtrl, self.output_path)
             print(self.interpolation_num_TextCtrl.GetValue())
-            interp720.create_dir()
-            interp720.remove_dup_frames()
-            interp720.run_splitter()
-            interp720.run_feature_flow()
-            interp720.stitch_sections()
-            interp720.delete_files()
+            interp720.splitVideoIntoSections()
+            interp720.runFeatureFlow()
+            interp720.stitchVideo()
             self.completeDialog()
     
     def thread_start(self, event):
         thread = threading.Thread(target=self.onRunInterp, args=(event,))
+        # thread2 = threading.Thread(target=self.progressBar, args=(event,))
+        # thread2.start()
         thread.start()
 
     def completeDialog(self):
         wx.MessageBox('Feature Flow has finished interpolating your video. \n Check your output directory', 
                       'Interpolation Complete', wx.OK |wx.ICON_EXCLAMATION)
+
+    def progressBar(self, index):
+        self.pbar.SetValue(index)
 
     def InitUI(self):
 
@@ -152,7 +163,7 @@ class MainWindow(wx.Frame):
 
         panel = wx.Panel(self)
 
-        sizer = wx.GridBagSizer(5, 5)
+        sizer = wx.GridBagSizer(6, 6)
 
         topDescription = wx.StaticText(panel, label="Support video resolution: 640x360, 1280x720")
         sizer.Add(topDescription, pos=(0, 0), flag=wx.TOP|wx.LEFT|wx.BOTTOM,
@@ -214,21 +225,29 @@ class MainWindow(wx.Frame):
             flag=wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT , border=10)
 
         button3 = wx.Button(panel, label='Help')
-        sizer.Add(button3, pos=(7, 0), flag=wx.LEFT, border=10)
+        sizer.Add(button3, pos=(8, 0), flag=wx.LEFT, border=10)
 
         CancleButton = wx.Button(panel, label="Cancel")
-        sizer.Add(CancleButton, pos=(7, 3))
+        sizer.Add(CancleButton, pos=(8, 3))
 
         RunButton = wx.Button(panel, label="Run")
-        sizer.Add(RunButton, pos=(7, 4), span=(1, 1),
+        sizer.Add(RunButton, pos=(8, 4), span=(1, 1),
             flag=wx.BOTTOM|wx.RIGHT, border=10)
         # RunButton.Bind(wx.EVT_BUTTON, self.onRunInterp)
         RunButton.Bind(wx.EVT_BUTTON, self.thread_start)
+
+        self.pbar = wx.Gauge(panel, range=getInterpolationRange(), size = (100, 25), style =  wx.GA_HORIZONTAL)
+        sizer.Add(self.pbar,pos=(7,0), span=(1,6), flag=wx.EXPAND|wx.ALL, border=5)
+        # Publisher().subscribe()
 
         sizer.AddGrowableCol(2)
 
         panel.SetSizer(sizer)
         sizer.Fit(self)
+
+# class Progress:
+#     def progressBar(index):
+        
         
 
 def main():
