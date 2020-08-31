@@ -33,23 +33,21 @@ class Resolution360P:
         self.finished_file_name : str = Path.cwd() / str(self.file_name + '-final.mp4')
         self.interp_output_file_name : str = Path.cwd() / 'output.mp4'
 
-    def removeDupFrames(self):
+    # def removeDupFrames(self):
         # filename = self.dir_name_based_off_filename
         # file = self.path_to_dir_name_based_off_filename / filename
         # print(file)
-        print('ffmpeg.exe  -qscale 0 -i ' + str(self.file_name) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
+        # print('ffmpeg.exe  -qscale 0 -i ' + str(self.file_name) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
         # os.system('ffmpeg.exe -i ' + str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
         # os.system(str(ffmpeg_exe) + ' -i '+ str(file) + '.mp4 -vsync 0 -frame_pts true -vf mpdecimate ' + str(self.input_dir / filename) + '-decimated.mp4')
 
     def runFeatureFlow(self):
-        # TOP LEFT
         print(self.interp_num)
         print('Input Video: ',(self.input_video))
-        # print('CUDA_VISIBLE_DEVICES=0 python sequence_run.py --checkpoint checkpoints/FeFlow.ckpt --video_path ' + file + ' --t_interp ' + str(interpolation_num))
+
         main(self.interp_num, self.input_video)
 
         print(Path(self.interp_output_file_name) / Path(self.output_path))
-
         time.sleep(3)
         shutil.move('output.mp4', Path(self.interp_output_file_name) / Path(self.output_path))
 
