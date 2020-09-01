@@ -35,6 +35,7 @@ class MainWindow(wx.Frame):
                         A state-of-the-art Video Frame Interpolation Method using deep semantic flows blending. 
                         FeatureFlow: Robust Video Interpolation via Structure-to-texture Generation (IEEE 
                         Conference on Computer Vision and Pattern Recognition 2020)
+                        Source Code: https://github.com/CM-BF/FeatureFlow.git
                         """)
 
         licence = """MIT License
@@ -62,7 +63,7 @@ class MainWindow(wx.Frame):
 
         # info.SetIcon(wx.Icon('hunter.png', wx.BITMAP_TYPE_PNG))
         info.SetName('Feature Flow App')
-        info.SetVersion('0.1')
+        info.SetVersion('v0.1.0')
         info.SetDescription(description)
         info.SetLicence(licence)
         info.AddDeveloper('Citrine BM-BF')
@@ -236,6 +237,8 @@ class MainWindow(wx.Frame):
         # RunButton.Bind(wx.EVT_BUTTON, self.onRunInterp)
         RunButton.Bind(wx.EVT_BUTTON, self.thread_start)
 
+        print(getInterpolationIndex())
+        print(getInterpolationRange())
         self.pbar = wx.Gauge(panel, range=getInterpolationRange(), size = (100, 25), style =  wx.GA_HORIZONTAL)
         sizer.Add(self.pbar,pos=(7,0), span=(1,6), flag=wx.EXPAND|wx.ALL, border=5)
         # Publisher().subscribe()
