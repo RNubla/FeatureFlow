@@ -11,3 +11,7 @@ build/
 FeatureFlow-App.spec
 ffmpeg/
 FeatureFlow-One-App.spec
+applet.py
+featureflowUI_runner.py
+UI.fbp
+formbuilder/example.xrc
