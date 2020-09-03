@@ -1,10 +1,10 @@
 from sys import flags
 import wx
 import wx.adv
-from wx.core import DefaultSpan
+# from wx.core import DefaultSpan
 import wx.lib.agw.pygauge as pb
 import os
-from split_video_sections import CheckResolution, Resolution720p, Resolution360p
+from feature_flow_interface import CheckResolution, Resolution720p, Resolution360p
 import threading
 from sequence_run import getInterpolationRange, getInterpolationIndex, getIteration
 # from wx.lib.pubsub import Publisher
@@ -23,6 +23,7 @@ class MainWindow(wx.Frame):
         self.input_file = ''
         self.output_path = ''
         self.pbar = None
+        self.interpNum = 0
 
         # self.pbar = wx.Gauge(self, range=getInterpolationRange(), size = (100, 25), style =  wx.GA_HORIZONTAL)
         # sizer.Add(self.pbar,pos=(7,0), span=(1,6), flag=wx.EXPAND|wx.ALL, border=5)
@@ -61,7 +62,6 @@ class MainWindow(wx.Frame):
 
         info = wx.adv.AboutDialogInfo()
 
-        # info.SetIcon(wx.Icon('hunter.png', wx.BITMAP_TYPE_PNG))
         info.SetName('Feature Flow App')
         info.SetVersion('v0.1.0')
         info.SetDescription(description)
@@ -71,8 +71,21 @@ class MainWindow(wx.Frame):
 
         wx.adv.AboutBox(info)
 
+    def getSelectedChoice(self, event):
+        choice = self.interpolation_choice.GetStringSelection()
+        if choice == '2x':
+            self.interpNum = 2
+            # print(choice)
+        elif choice == '4x':
+            self.interpNum = 4
+            # print(choice)
+        elif choice == '8x':
+            self.interpNum = 8
+            # print(choice)
+        
+        print('Interp Num: ',self.interpNum)
+
     def onSelectFile(self, event):
-        # self.input_file_name.SetValue("")
         wildcard = "MP4 source (*.mp4)|*.mp4|" \
         "All files (*.*)|*.*"
         dlg = wx.FileDialog(self, 
@@ -91,6 +104,10 @@ class MainWindow(wx.Frame):
             self.input_dir_TextCtrl.write(paths)
             self.input_file = paths
             print(self.input_file)
+            resolution = CheckResolution(self.input_file)
+            print(self.input_file)
+            print('Width: ',resolution.getWidth())
+            print('Height: ',resolution.getHeight())
         dlg.Destroy()
 
     def onSelectOutDir(self, event):
@@ -106,22 +123,13 @@ class MainWindow(wx.Frame):
 
     def onRunInterp(self, event):
         resolution = CheckResolution(self.input_file)
-        print(self.input_file)
-        print(resolution.getWidth())
-        print(resolution.getHeight())
-        interp_val_from_TextCtrl = int(float(self.interpolation_num_TextCtrl.GetValue()))
-
-        if resolution.getWidth() < int(720) and resolution.getHeight() < int(1280):  
-            interp = Resolution360p(self.input_file, interp_val_from_TextCtrl, self.output_path)
-            # interp.createDir()
+        if resolution.getWidth() < int(1280) and resolution.getHeight() < int(720):  
+            interp = Resolution360p(self.input_file, self.interpNum, self.output_path)
             # interp.removeDupFrames()
             interp.runFeatureFlow()
-            # interp.deleteFiles()
             self.completeDialog()
-
-        # else resolution.getWidth() == int(720) and resolution.getHeight() == int(1280):
         else:
-            interp720 = Resolution720p(self.input_file, interp_val_from_TextCtrl, self.output_path)
+            interp720 = Resolution720p(self.input_file, self.interpNum, self.output_path)
             print(self.interpolation_num_TextCtrl.GetValue())
             interp720.splitVideoIntoSections()
             interp720.runFeatureFlow()
@@ -130,8 +138,6 @@ class MainWindow(wx.Frame):
     
     def thread_start(self, event):
         thread = threading.Thread(target=self.onRunInterp, args=(event,))
-        # thread2 = threading.Thread(target=self.progressBar, args=(event,))
-        # thread2.start()
         thread.start()
 
     def completeDialog(self):
@@ -170,10 +176,6 @@ class MainWindow(wx.Frame):
         sizer.Add(topDescription, pos=(0, 0), flag=wx.TOP|wx.LEFT|wx.BOTTOM,
             border=10)
 
-        # icon = wx.StaticBitmap(panel, bitmap=wx.Bitmap('exec.png'))
-        # sizer.Add(icon, pos=(0, 4), flag=wx.TOP|wx.RIGHT|wx.ALIGN_RIGHT,
-            # border=5)
-
         line = wx.StaticLine(panel)
         sizer.Add(line, pos=(1, 0), span=(1, 5),
             flag=wx.EXPAND|wx.BOTTOM, border=10)
@@ -181,9 +183,10 @@ class MainWindow(wx.Frame):
         interpolation_num_StaticText = wx.StaticText(panel, label="Interpolation Number [2,4,8,...,etc]")
         sizer.Add(interpolation_num_StaticText, pos=(2, 0), flag=wx.LEFT, border=10)
 
-        self.interpolation_num_TextCtrl = wx.TextCtrl(panel)
-        sizer.Add(self.interpolation_num_TextCtrl, pos=(2, 1), span=(1, 3), flag=wx.TOP|wx.EXPAND)
-        # filename_TextCtrl.Disable()
+        self.interpolation_choices = ['2x', '4x', '8x']
+        self.interpolation_choice = wx.Choice(panel, wx.ID_ANY, wx.Point(-1,-1), wx.Size(100,-1), self.interpolation_choices, 0)
+        sizer.Add(self.interpolation_choice, pos=(2,1), span=(1,3), flag=wx.TOP|wx.EXPAND)
+        self.interpolation_choice.Bind(wx.EVT_CHOICE, self.getSelectedChoice)
 
         input_dir_StaticText = wx.StaticText(panel, label="Input Directory")
         sizer.Add(input_dir_StaticText, pos=(3, 0), flag=wx.LEFT|wx.TOP, border=10)
@@ -204,10 +207,6 @@ class MainWindow(wx.Frame):
         self.output_dir_TextCtrl = wx.TextCtrl(panel)
         sizer.Add(self.output_dir_TextCtrl, pos=(4, 1), span=(1, 3), flag=wx.TOP|wx.EXPAND,
             border=5)
-
-        # combo = wx.ComboBox(panel)
-        # sizer.Add(combo, pos=(4, 1), span=(1, 3),
-        #     flag=wx.TOP|wx.EXPAND, border=5)
 
         output_button_browse = wx.Button(panel, label="Browse...")
         sizer.Add(output_button_browse, pos=(4, 4), flag=wx.TOP|wx.RIGHT, border=5)
@@ -241,17 +240,11 @@ class MainWindow(wx.Frame):
         print(getInterpolationRange())
         self.pbar = wx.Gauge(panel, range=getInterpolationRange(), size = (100, 25), style =  wx.GA_HORIZONTAL)
         sizer.Add(self.pbar,pos=(7,0), span=(1,6), flag=wx.EXPAND|wx.ALL, border=5)
-        # Publisher().subscribe()
 
         sizer.AddGrowableCol(2)
 
         panel.SetSizer(sizer)
         sizer.Fit(self)
-
-# class Progress:
-#     def progressBar(index):
-        
-        
 
 def main():
 
