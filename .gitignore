@@ -15,3 +15,6 @@ applet.py
 featureflowUI_runner.py
 UI.fbp
 formbuilder/example.xrc
+bin/ffmpeg.exe
+bin/ffplay.exe
+bin/ffprobe.exe
