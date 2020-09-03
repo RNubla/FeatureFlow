@@ -6,7 +6,7 @@ import os
 import torch
 import cv2
 import torchvision.transforms as transforms
-from skimage.measure import compare_psnr
+# from skimage.measure import compare_psnr
 from PIL import Image
 import src.pure_network as layers
 from tqdm import tqdm
