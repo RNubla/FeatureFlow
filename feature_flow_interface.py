@@ -4,7 +4,8 @@ import os , shutil, time
 from pathlib import Path
 
 # from numpy.core.arrayprint import str_format
-from sequence_run import main, getInterpolationIndex, getInterpolationRange, getIteration
+# from sequence_run import main, getInterpolationIndex, getInterpolationRange, getIteration
+from .sequence_run import main, getInterpolationIndex, getInterpolationRange, getIteration
 import cv2
 
 ffmpeg_exe = Path().cwd() / 'ffmpeg.exe'
