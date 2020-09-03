@@ -13,9 +13,11 @@ import math
 import models.bdcn.bdcn as bdcn
 
 # For parsing commandline arguments
+
+
 def str2bool(v):
     if isinstance(v, bool):
-       return v
+        return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -23,11 +25,16 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--checkpoint", type=str, help='path of checkpoint for pretrained model')
-parser.add_argument('--feature_level', type=int, default=3, help='Using feature_level=? in GEN, Default:3')
-parser.add_argument('--bdcn_model', type=str, default='/home/visiting/Projects/citrine/SeDraw/models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth')
-parser.add_argument('--DE_pretrained', action='store_true', help='using this flag if training the model from pretrained parameters.')
+parser.add_argument("--checkpoint", type=str,
+                    help='path of checkpoint for pretrained model')
+parser.add_argument('--feature_level', type=int, default=3,
+                    help='Using feature_level=? in GEN, Default:3')
+parser.add_argument('--bdcn_model', type=str,
+                    default='/home/visiting/Projects/citrine/SeDraw/models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth')
+parser.add_argument('--DE_pretrained', action='store_true',
+                    help='using this flag if training the model from pretrained parameters.')
 parser.add_argument('--DE_ckpt', type=str, help='path to DE checkpoint')
 parser.add_argument('--imgpath', type=str, required=True)
 parser.add_argument('--first', type=str, required=True)
@@ -38,18 +45,18 @@ args = parser.parse_args()
 
 def _pil_loader(path, cropArea=None, resizeDim=None, frameFlip=0):
 
-
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         img = Image.open(f)
         # Resize image if specified.
-        resized_img = img.resize(resizeDim, Image.ANTIALIAS) if (resizeDim != None) else img
+        resized_img = img.resize(resizeDim, Image.ANTIALIAS) if (
+            resizeDim != None) else img
         # Crop image if crop area specified.
         cropped_img = img.crop(cropArea) if (cropArea != None) else resized_img
         # Flip image horizontally if specified.
-        flipped_img = cropped_img.transpose(Image.FLIP_LEFT_RIGHT) if frameFlip else cropped_img
+        flipped_img = cropped_img.transpose(
+            Image.FLIP_LEFT_RIGHT) if frameFlip else cropped_img
         return flipped_img.convert('RGB')
-
 
 
 bdcn = bdcn.BDCN()
@@ -109,8 +116,10 @@ def main():
         triple_path = os.path.join(args.imgpath, folder)
         if not (os.path.isdir(triple_path)):
             continue
-        X0 = transform(_pil_loader('%s/%s' % (triple_path, args.first))).unsqueeze(0)
-        X1 = transform(_pil_loader('%s/%s' % (triple_path, args.second))).unsqueeze(0)
+        X0 = transform(_pil_loader('%s/%s' %
+                                   (triple_path, args.first))).unsqueeze(0)
+        X1 = transform(_pil_loader('%s/%s' %
+                                   (triple_path, args.second))).unsqueeze(0)
 
         assert (X0.size(2) == X1.size(2))
         assert (X0.size(3) == X1.size(3))
@@ -147,8 +156,10 @@ def main():
         first, second = X0, X1
         imgt = ToImage(first, second)
 
-        imgt_np = imgt.squeeze(0).cpu().numpy()#[:, intPaddingTop:intPaddingTop+intHeight, intPaddingLeft: intPaddingLeft+intWidth]
-        imgt_png = np.uint8(((imgt_np + 1.0) / 2.0).transpose(1, 2, 0)[:, :, ::-1] * 255)
+        # [:, intPaddingTop:intPaddingTop+intHeight, intPaddingLeft: intPaddingLeft+intWidth]
+        imgt_np = imgt.squeeze(0).cpu().numpy()
+        imgt_png = np.uint8(
+            ((imgt_np + 1.0) / 2.0).transpose(1, 2, 0)[:, :, ::-1] * 255)
         if not os.path.isdir(triple_path):
             os.system('mkdir -p %s' % triple_path)
         cv2.imwrite(triple_path + '/SeDraw.png', imgt_png)
@@ -174,6 +185,5 @@ def main():
     PSNR = PSNR / count
     print('Average IE/PSNR:', IE, PSNR)
 
+
 main()
-
-

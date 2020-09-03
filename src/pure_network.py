@@ -1,7 +1,9 @@
-import src.model as model
+# import src.model as model
+from . import model as model
 import torch.nn as nn
 import torch
-from models.ResBlock import GlobalGenerator
+# from models.ResBlock import GlobalGenerator
+from ..models.ResBlock import GlobalGenerator
 
 
 class StructureGen(nn.Module):
@@ -13,10 +15,11 @@ class StructureGen(nn.Module):
         channel = 2 ** (6 + self.feature_level)
         self.extract_features = model.ExtractFeatures()
         self.dcn = model.DeformableConv(channel, dg=16)
-        self.generator = GlobalGenerator(channel, 4, n_downsampling=self.feature_level)
+        self.generator = GlobalGenerator(
+            channel, 4, n_downsampling=self.feature_level)
 
     def forward(self, input):
-        img0_e, img1_e= input
+        img0_e, img1_e = input
 
         ft_img0 = list(self.extract_features(img0_e))[self.feature_level]
         ft_img1 = list(self.extract_features(img1_e))[self.feature_level]
@@ -31,9 +34,7 @@ class StructureGen(nn.Module):
         return ref_imgt, edge_ref_imgt
 
 
-
 class DetailEnhance(nn.Module):
-
 
     def __init__(self):
 
@@ -42,11 +43,12 @@ class DetailEnhance(nn.Module):
         self.feature_level = 3
 
         self.extract_features = model.ValidationFeatures()
-        self.extract_aligned_features = model.ExtractAlignedFeatures(n_res=5) # 4  5
-        self.pcd_align = model.PCD_Align(groups=8) # 4  8
+        self.extract_aligned_features = model.ExtractAlignedFeatures(
+            n_res=5)  # 4  5
+        self.pcd_align = model.PCD_Align(groups=8)  # 4  8
         self.tsa_fusion = model.TSA_Fusion(nframes=3, center=1)
 
-        self.reconstruct = model.Reconstruct(n_res=20) # 5  40
+        self.reconstruct = model.Reconstruct(n_res=20)  # 5  40
 
     def forward(self, input):
         """

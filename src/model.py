@@ -1,10 +1,12 @@
 import torch
 import torchvision
 import torch.nn as nn
-from models.ResBlock import SemiResnetBlock_bn, ResnetBlock_bn, SemiResnetBlock, ResnetBlock
+# from models.ResBlock import SemiResnetBlock_bn, ResnetBlock_bn, SemiResnetBlock, ResnetBlock
+from ..models.ResBlock import SemiResnetBlock_bn, ResnetBlock_bn, SemiResnetBlock, ResnetBlock
 # import mmdet.ops.dcn.deform_conv as dc# DeformConv, ModulatedDeformConv
 from mmdet.ops.dcn.deform_conv import DeformConv, ModulatedDeformConv, _pair, modulated_deform_conv
 import torch.nn.functional as F
+
 
 class DCN_sep(ModulatedDeformConv):
 
@@ -82,27 +84,35 @@ class ReVgg19(nn.Module):
         self.dcn3 = DeformableConv(256, 2)
         self.dcn4 = DeformableConv(512, 2)
 
-        self.model_4 = nn.Sequential(ReVggBlock(512, 512), ReVggBlock(512, 512), ReVggBlock(512, 256, True, True))
-        self.model_3 = nn.Sequential(ReVggBlock(256, 256), ReVggBlock(256, 256), ReVggBlock(256, 128, True, True))
-        self.model_2 = nn.Sequential(ReVggBlock(128, 128), ReVggBlock(128, 64, True, True))
+        self.model_4 = nn.Sequential(ReVggBlock(512, 512), ReVggBlock(
+            512, 512), ReVggBlock(512, 256, True, True))
+        self.model_3 = nn.Sequential(ReVggBlock(256, 256), ReVggBlock(
+            256, 256), ReVggBlock(256, 128, True, True))
+        self.model_2 = nn.Sequential(ReVggBlock(
+            128, 128), ReVggBlock(128, 64, True, True))
         self.model_1 = [ReVggBlock(64, 64)]
 
         self.model_1 += [nn.ReplicationPad2d(1)]
         self.model_1 += [nn.Conv2d(64, 64, 3)]
 
         self.model_1 = nn.Sequential(*self.model_1)
-        self.model_0 = nn.Sequential(SemiResnetBlock_bn(64, 64), ResnetBlock_bn(64), ResnetBlock_bn(64), SemiResnetBlock_bn(64, 3, end=True), nn.Tanh())
+        self.model_0 = nn.Sequential(SemiResnetBlock_bn(64, 64), ResnetBlock_bn(
+            64), ResnetBlock_bn(64), SemiResnetBlock_bn(64, 3, end=True), nn.Tanh())
 
-        self.offset_tran = nn.Sequential(ReVggBlock(128, 128), ReVggBlock(128, 12, end=True))
+        self.offset_tran = nn.Sequential(ReVggBlock(
+            128, 128), ReVggBlock(128, 12, end=True))
 
     def forward(self, ft_img0, ft_img1):
         ft4, offset, _, _ = self.dcn4(ft_img0[4], ft_img1[4])
         out4 = self.model_4(ft4)
-        ft3, offset, _, _ = self.dcn3(ft_img0[3], ft_img1[3], last_offset=offset, last_up_out=out4)
+        ft3, offset, _, _ = self.dcn3(
+            ft_img0[3], ft_img1[3], last_offset=offset, last_up_out=out4)
         out3 = self.model_3(ft3)
-        ft2, offset, _, _ = self.dcn2(ft_img0[2], ft_img1[2], last_offset=offset, last_up_out=out3)
+        ft2, offset, _, _ = self.dcn2(
+            ft_img0[2], ft_img1[2], last_offset=offset, last_up_out=out3)
         out2 = self.model_2(ft2)
-        ft1, _, last, test = self.dcn1(ft_img0[1], ft_img1[1], last_offset=offset, last_up_out=out2)
+        ft1, _, last, test = self.dcn1(
+            ft_img0[1], ft_img1[1], last_offset=offset, last_up_out=out2)
         out1 = self.model_1(ft1)
         # offset = self.offset_tran(offset)
         # ft0, offset = self.dcn0(torch.cat([ft_img0[0], ft_img1[0]], dim=1), last_offset=offset, last_up_out=out1, up=False)
@@ -116,9 +126,9 @@ class ExtractFeatures(nn.Module):
         super(ExtractFeatures, self).__init__()
 
         self.net = torchvision.models.resnet50(pretrained=True)
-        self.conv1_4in = nn.Conv2d(4, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+        self.conv1_4in = nn.Conv2d(4, 64, kernel_size=(
+            7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         nn.init.xavier_uniform(self.conv1_4in.weight)
-
 
     def forward(self, x):
         output = self.conv1_4in(x)
@@ -139,19 +149,23 @@ class ValidationFeatures(nn.Module):
 
         vgg = torchvision.models.vgg16_bn(pretrained=True)
 
-        self.extract_feature1 = nn.Sequential(*list(vgg.features.children())[:4])
+        self.extract_feature1 = nn.Sequential(
+            *list(vgg.features.children())[:4])
         for param in self.extract_feature1.parameters(True):
             param.requires_grad = False
 
-        self.extract_feature2 = nn.Sequential(*list(vgg.features.children())[4:11])
+        self.extract_feature2 = nn.Sequential(
+            *list(vgg.features.children())[4:11])
         for param in self.extract_feature2.parameters(True):
             param.requires_grad = False
 
-        self.extract_feature3 = nn.Sequential(*list(vgg.features.children())[11:21])
+        self.extract_feature3 = nn.Sequential(
+            *list(vgg.features.children())[11:21])
         for param in self.extract_feature3.parameters(True):
             param.requires_grad = False
 
-        self.extract_feature4 = nn.Sequential(*list(vgg.features.children())[21:31])
+        self.extract_feature4 = nn.Sequential(
+            *list(vgg.features.children())[21:31])
         for param in self.extract_feature4.parameters(True):
             param.requires_grad = False
 
@@ -171,7 +185,8 @@ class StructureExtractor(nn.Module):
 
         vgg = torchvision.models.vgg16(pretrained=True)
 
-        self.extract_feature1 = nn.Sequential(*list(vgg.features.children())[:4])
+        self.extract_feature1 = nn.Sequential(
+            *list(vgg.features.children())[:4])
         for param in self.extract_feature1.parameters(True):
             param.requires_grad = False
 
@@ -194,16 +209,20 @@ class DeformableConv(nn.Module):
         super(DeformableConv, self).__init__()
         self.dg = dg
 
-        self.offset_cnn1 = nn.Sequential(nn.Conv2d(2 * inchannel, inchannel, 3, padding=1), nn.BatchNorm2d(inchannel), nn.LeakyReLU(True))
-        self.offset_cnn2 = nn.Sequential(nn.Conv2d(2 * 2 * 2 * dg * 9, 2 * 2 * dg * 9, 3, padding=1), nn.BatchNorm2d(2 * 2 * dg * 9), nn.LeakyReLU(True))
-        self.offset_cnn3 = nn.Sequential(*([ResnetBlock_bn(inchannel)] * 5 + [ResnetBlock(inchannel)] * 3 + [nn.Conv2d(inchannel, 2 * 2 * dg * 9, 3, padding=1)]))
+        self.offset_cnn1 = nn.Sequential(nn.Conv2d(
+            2 * inchannel, inchannel, 3, padding=1), nn.BatchNorm2d(inchannel), nn.LeakyReLU(True))
+        self.offset_cnn2 = nn.Sequential(nn.Conv2d(
+            2 * 2 * 2 * dg * 9, 2 * 2 * dg * 9, 3, padding=1), nn.BatchNorm2d(2 * 2 * dg * 9), nn.LeakyReLU(True))
+        self.offset_cnn3 = nn.Sequential(*([ResnetBlock_bn(inchannel)] * 5 + [ResnetBlock(
+            inchannel)] * 3 + [nn.Conv2d(inchannel, 2 * 2 * dg * 9, 3, padding=1)]))
 
         self.emb = nn.Conv2d(inchannel, inchannel, 3, padding=1)
-        self.mix_map = nn.Sequential(nn.Conv2d(2 * inchannel, inchannel, 3, padding=1), nn.LeakyReLU(True), *([ResnetBlock(inchannel)] * 3), nn.Conv2d(inchannel, 2 * dg, 3, padding=1))
+        self.mix_map = nn.Sequential(nn.Conv2d(2 * inchannel, inchannel, 3, padding=1), nn.LeakyReLU(
+            True), *([ResnetBlock(inchannel)] * 3), nn.Conv2d(inchannel, 2 * dg, 3, padding=1))
 
-        self.dcn = DeformConv(inchannel, inchannel, 3, padding=1, deformable_groups=dg)
+        self.dcn = DeformConv(inchannel, inchannel, 3,
+                              padding=1, deformable_groups=dg)
         self.up = nn.UpsamplingBilinear2d(scale_factor=2)
-
 
     def forward(self, x, y, last_offset=None, up=True):
         offset = None
@@ -211,7 +230,8 @@ class DeformableConv(nn.Module):
             if up:
                 last_offset = self.up(last_offset)
             offset = self.offset_cnn1(torch.cat([x, y], dim=1))
-            offset = self.offset_cnn2(torch.cat([offset, last_offset * 2], dim=1))
+            offset = self.offset_cnn2(
+                torch.cat([offset, last_offset * 2], dim=1))
             offset_com = self.offset_cnn3(offset)
         else:
             offset = self.offset_cnn1(torch.cat([x, y], dim=1))
@@ -219,12 +239,14 @@ class DeformableConv(nn.Module):
         offset_x, offset_y = torch.chunk(offset, 2, dim=1)
         out_x = self.dcn(x, offset_x)
         out_y = self.dcn(y, offset_y)
-        vmap_x, vmap_y = torch.chunk(torch.sigmoid(self.mix_map(torch.cat([self.emb(out_x), self.emb(out_y)], dim=1))), 2, dim=1)
+        vmap_x, vmap_y = torch.chunk(torch.sigmoid(self.mix_map(
+            torch.cat([self.emb(out_x), self.emb(out_y)], dim=1))), 2, dim=1)
         vmap_x = torch.chunk(vmap_x, self.dg, dim=1)
         vmap_y = torch.chunk(vmap_y, self.dg, dim=1)
         out_x_d = torch.chunk(out_x, self.dg, dim=1)
         out_y_d = torch.chunk(out_y, self.dg, dim=1)
-        out = [vmap_x[i] * out_x_d[i] + vmap_y[i] * out_y_d[i] for i in range(self.dg)]
+        out = [vmap_x[i] * out_x_d[i] + vmap_y[i] * out_y_d[i]
+               for i in range(self.dg)]
         out = torch.cat(out, dim=1)
 
         return out, out_x, out_y
@@ -256,7 +278,6 @@ class ExtractAlignedFeatures(nn.Module):
         return [ft_L1, ft_L2, ft_L3]
 
 
-
 class PCD_Align(nn.Module):
     ''' Alignment module using Pyramid, Cascading and Deformable convolution
     with 3 pyramid levels.
@@ -265,26 +286,34 @@ class PCD_Align(nn.Module):
     def __init__(self, nf=64, groups=8):
         super(PCD_Align, self).__init__()
         # L3: level 3, 1/4 spatial size
-        self.L3_offset_conv1 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
+        self.L3_offset_conv1 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
         self.L3_offset_conv2 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.L3_dcnpack = DCN_sep(nf, nf, 3, stride=1, padding=1, dilation=1,
                                   deformable_groups=groups)
         # L2: level 2, 1/2 spatial size
-        self.L2_offset_conv1 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
-        self.L2_offset_conv2 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for offset
+        self.L2_offset_conv1 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
+        self.L2_offset_conv2 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for offset
         self.L2_offset_conv3 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.L2_dcnpack = DCN_sep(nf, nf, 3, stride=1, padding=1, dilation=1,
                                   deformable_groups=groups)
-        self.L2_fea_conv = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for fea
+        self.L2_fea_conv = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for fea
         # L1: level 1, original spatial size
-        self.L1_offset_conv1 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
-        self.L1_offset_conv2 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for offset
+        self.L1_offset_conv1 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
+        self.L1_offset_conv2 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for offset
         self.L1_offset_conv3 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.L1_dcnpack = DCN_sep(nf, nf, 3, stride=1, padding=1, dilation=1,
                                   deformable_groups=groups)
-        self.L1_fea_conv = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for fea
+        self.L1_fea_conv = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for fea
         # Cascading DCN
-        self.cas_offset_conv1 = nn.Conv2d(nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
+        self.cas_offset_conv1 = nn.Conv2d(
+            nf * 2, nf, 3, 1, 1, bias=True)  # concat for diff
         self.cas_offset_conv2 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
 
         self.cas_dcnpack = DCN_sep(nf, nf, 3, stride=1, padding=1, dilation=1,
@@ -304,20 +333,27 @@ class PCD_Align(nn.Module):
         # L2
         L2_offset = torch.cat([nbr_fea_l[1], ref_fea_l[1]], dim=1)
         L2_offset = self.lrelu(self.L2_offset_conv1(L2_offset))
-        L3_offset = F.interpolate(L3_offset, scale_factor=2, mode='bilinear', align_corners=False)
-        L2_offset = self.lrelu(self.L2_offset_conv2(torch.cat([L2_offset, L3_offset * 2], dim=1)))
+        L3_offset = F.interpolate(
+            L3_offset, scale_factor=2, mode='bilinear', align_corners=False)
+        L2_offset = self.lrelu(self.L2_offset_conv2(
+            torch.cat([L2_offset, L3_offset * 2], dim=1)))
         L2_offset = self.lrelu(self.L2_offset_conv3(L2_offset))
         L2_fea = self.L2_dcnpack(nbr_fea_l[1], L2_offset)
-        L3_fea = F.interpolate(L3_fea, scale_factor=2, mode='bilinear', align_corners=False)
-        L2_fea = self.lrelu(self.L2_fea_conv(torch.cat([L2_fea, L3_fea], dim=1)))
+        L3_fea = F.interpolate(L3_fea, scale_factor=2,
+                               mode='bilinear', align_corners=False)
+        L2_fea = self.lrelu(self.L2_fea_conv(
+            torch.cat([L2_fea, L3_fea], dim=1)))
         # L1
         L1_offset = torch.cat([nbr_fea_l[0], ref_fea_l[0]], dim=1)
         L1_offset = self.lrelu(self.L1_offset_conv1(L1_offset))
-        L2_offset = F.interpolate(L2_offset, scale_factor=2, mode='bilinear', align_corners=False)
-        L1_offset = self.lrelu(self.L1_offset_conv2(torch.cat([L1_offset, L2_offset * 2], dim=1)))
+        L2_offset = F.interpolate(
+            L2_offset, scale_factor=2, mode='bilinear', align_corners=False)
+        L1_offset = self.lrelu(self.L1_offset_conv2(
+            torch.cat([L1_offset, L2_offset * 2], dim=1)))
         L1_offset = self.lrelu(self.L1_offset_conv3(L1_offset))
         L1_fea = self.L1_dcnpack(nbr_fea_l[0], L1_offset)
-        L2_fea = F.interpolate(L2_fea, scale_factor=2, mode='bilinear', align_corners=False)
+        L2_fea = F.interpolate(L2_fea, scale_factor=2,
+                               mode='bilinear', align_corners=False)
         L1_fea = self.L1_fea_conv(torch.cat([L1_fea, L2_fea], dim=1))
         # Cascading
         offset = torch.cat([L1_fea, ref_fea_l[0]], dim=1)
@@ -365,23 +401,26 @@ class TSA_Fusion(nn.Module):
 
     def forward(self, aligned_fea):
         B, N, C, H, W = aligned_fea.size()  # N video frames
-        #### temporal attention
+        # temporal attention
         emb_ref = self.tAtt_2(aligned_fea[:, self.center, :, :, :].clone())
-        emb = self.tAtt_1(aligned_fea.view(-1, C, H, W)).view(B, N, -1, H, W)  # [B, N, C(nf), H, W]
+        emb = self.tAtt_1(aligned_fea.view(-1, C, H, W)).view(B,
+                                                              N, -1, H, W)  # [B, N, C(nf), H, W]
 
         cor_l = []
         for i in range(N):
             emb_nbr = emb[:, i, :, :, :]
-            cor_tmp = torch.sum(emb_nbr * emb_ref, 1).unsqueeze(1)  # B, 1, H, W
+            cor_tmp = torch.sum(emb_nbr * emb_ref,
+                                1).unsqueeze(1)  # B, 1, H, W
             cor_l.append(cor_tmp)
         cor_prob = torch.sigmoid(torch.cat(cor_l, dim=1))  # B, N, H, W
-        cor_prob = cor_prob.unsqueeze(2).repeat(1, 1, C, 1, 1).view(B, -1, H, W)
+        cor_prob = cor_prob.unsqueeze(2).repeat(
+            1, 1, C, 1, 1).view(B, -1, H, W)
         aligned_fea = aligned_fea.view(B, -1, H, W) * cor_prob
 
-        #### fusion
+        # fusion
         fea = self.lrelu(self.fea_fusion(aligned_fea))
 
-        #### spatial attention
+        # spatial attention
         att = self.lrelu(self.sAtt_1(aligned_fea))
         att_max = self.maxpool(att)
         att_avg = self.avgpool(att)
@@ -392,12 +431,14 @@ class TSA_Fusion(nn.Module):
         att_avg = self.avgpool(att_L)
         att_L = self.lrelu(self.sAtt_L2(torch.cat([att_max, att_avg], dim=1)))
         att_L = self.lrelu(self.sAtt_L3(att_L))
-        att_L = F.interpolate(att_L, scale_factor=2, mode='bilinear', align_corners=False)
+        att_L = F.interpolate(att_L, scale_factor=2,
+                              mode='bilinear', align_corners=False)
 
         att = self.lrelu(self.sAtt_3(att))
         att = att + att_L
         att = self.lrelu(self.sAtt_4(att))
-        att = F.interpolate(att, scale_factor=2, mode='bilinear', align_corners=False)
+        att = F.interpolate(att, scale_factor=2,
+                            mode='bilinear', align_corners=False)
         att = self.sAtt_5(att)
         att_add = self.sAtt_add_2(self.lrelu(self.sAtt_add_1(att)))
         att = torch.sigmoid(att)
@@ -411,9 +452,9 @@ class Reconstruct(nn.Module):
     def __init__(self, nf=64, n_res=10):
         super(Reconstruct, self).__init__()
 
-        #### reconstruction
+        # reconstruction
         self.recon_trunk = nn.Sequential(*([ResnetBlock(nf)] * n_res))
-        #### upsampling
+        # upsampling
         self.upconv1 = nn.Conv2d(nf, nf * 4, 3, 1, 1, bias=True)
         self.upconv2 = nn.Conv2d(nf, 64 * 4, 3, 1, 1, bias=True)
         self.pixel_shuffle = nn.PixelShuffle(2)
@@ -431,6 +472,7 @@ class Reconstruct(nn.Module):
         out = self.conv_last(out)
         out += x_center
         return out
+
 
 class Predeblur_ResNet_Pyramid(nn.Module):
     def __init__(self, nf=128, HR_in=False):

@@ -8,11 +8,13 @@ import cv2
 import torchvision.transforms as transforms
 # from skimage.measure import compare_psnr
 from PIL import Image
-import src.pure_network as layers
+# import src.pure_network as layers
+from . src import pure_network as layers
 from tqdm import tqdm
 import numpy as np
 import math
-import models.bdcn.bdcn as bdcn
+# import models.bdcn.bdcn as bdcn
+from ..FeatureFlow.models.bdcn import bdcn as bdcn
 import shutil
 # from feature_flow_ui import progressBar
 # from wx.lib.pubsub import Publisher
@@ -20,9 +22,11 @@ import shutil
 ffmpeg_exe = Path().cwd() / 'ffmpeg.exe'
 
 # For parsing commandline arguments
+
+
 def str2bool(v):
     if isinstance(v, bool):
-       return v
+        return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
@@ -47,18 +51,18 @@ def str2bool(v):
 
 def _pil_loader(path, cropArea=None, resizeDim=None, frameFlip=0):
 
-
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         img = Image.open(f)
         # Resize image if specified.
-        resized_img = img.resize(resizeDim, Image.ANTIALIAS) if (resizeDim != None) else img
+        resized_img = img.resize(resizeDim, Image.ANTIALIAS) if (
+            resizeDim != None) else img
         # Crop image if crop area specified.
         cropped_img = img.crop(cropArea) if (cropArea != None) else resized_img
         # Flip image horizontally if specified.
-        flipped_img = cropped_img.transpose(Image.FLIP_LEFT_RIGHT) if frameFlip else cropped_img
+        flipped_img = cropped_img.transpose(
+            Image.FLIP_LEFT_RIGHT) if frameFlip else cropped_img
         return flipped_img.convert('RGB')
-
 
 
 bdcn = bdcn.BDCN()
@@ -98,11 +102,14 @@ def ToImage(frame0, frame1):
         imgt = torch.clamp(imgt, max=1., min=-1.)
 
     return imgt
+
+
 def IndexHelper(i, digit):
     index = str(i)
     for j in range(digit-len(str(i))):
         index = '0'+index
     return index
+
 
 def VideoToSequence(path, time):
     video = cv2.VideoCapture(path)
@@ -126,23 +133,25 @@ def VideoToSequence(path, time):
         # print(index)
     return [dir_path, length, fps]
 
-iter : int = 0
-filenames : str = None
-interpoIndex : int = 0
+
+iter: int = 0
+filenames: str = None
+interpoIndex: int = 0
 # interpoRange : int = len(filenames) -1
-interpoRange : int = 0
+interpoRange: int = 0
 
 
-
-def setIteration(iteration : int ) -> int:
+def setIteration(iteration: int) -> int:
     global iter
     iter = iteration
 
-def setInterpolationIndex(interpolation : int) -> int:
+
+def setInterpolationIndex(interpolation: int) -> int:
     global interpoIndex
     interpoIndex = interpolation
 
-def setInterpolationRange(interpolationRange : int) -> int:
+
+def setInterpolationRange(interpolationRange: int) -> int:
     global interpoRange
     interpoRange = interpolationRange
 
@@ -150,23 +159,28 @@ def setInterpolationRange(interpolationRange : int) -> int:
 def getIteration() -> int:
     return iter
 
+
 def getInterpolationIndex() -> int:
     return interpoIndex
+
 
 def getInterpolationRange():
     return interpoRange
 
-def main(interp : int, input_file : str):
-    cwd = Path(__file__).resolve()
-    model_file = cwd.parent / 'models/bdcn/final-model/bdcn_pretrained_on_bsds500.pth'
-    checkpoint_file = cwd.parent / 'checkpoints/FeFlow.ckpt'
+
+def main(interp: int, input_file: str):
+    # cwd = Path(__file__).resolve()
+    print('CWD!: ', Path(__file__).parent.parent.parent)
+    modelAndCheckpoint = str(Path(__file__).parent.parent.parent)
+    model_file = str(Path(__file__) / 'final-model/bdcn_pretrained_on_bsds500.pth')
+    checkpoint_file = str(Path(modelAndCheckpoint) / 'checkpoints/FeFlow.ckpt')
     print(model_file)
     print(model_file.exists())
-    print('INTERP: ',interp)
+    print('INTERP: ', interp)
     # initial
     # iter = math.log(args.t_interp, int(2))
     iter = math.log(interp, int(2))
-    if iter%1:
+    if iter % 1:
         print('the times of interpolating must be power of 2!!')
         return
     iter = int(iter)
@@ -189,7 +203,8 @@ def main(interp : int, input_file : str):
     [dir_path, frame_count, fps] = VideoToSequence(input_file, interp)
 
     for i in range(iter):
-        print('processing iter' + str(i+1) + ', ' + str((i+1)*frame_count) + ' frames in total')
+        print('processing iter' + str(i+1) + ', ' +
+              str((i+1)*frame_count) + ' frames in total')
         # print('Iteration: ',iter)
         setIteration(iter)
         filenames = os.listdir(dir_path)
@@ -197,7 +212,7 @@ def main(interp : int, input_file : str):
         # for i in tqdm(range(0, len(filenames) - 1)):
         # print('Filename: ', filenames)
         # interpoRange : int = len(filenames) - 1
-        setInterpolationRange(len(filenames) -1)
+        setInterpolationRange(len(filenames) - 1)
         # print('InterpoRange: ', interpoRange)
         for i in tqdm(range(0, getInterpolationRange())):
             # global interpoIndex
@@ -258,7 +273,8 @@ def main(interp : int, input_file : str):
 
             imgt_np = imgt.squeeze(
                 0).cpu().numpy()  # [:, intPaddingTop:intPaddingTop+intHeight, intPaddingLeft: intPaddingLeft+intWidth]
-            imgt_png = np.uint8(((imgt_np + 1.0) / 2.0).transpose(1, 2, 0)[:, :, ::-1] * 255)
+            imgt_png = np.uint8(
+                ((imgt_np + 1.0) / 2.0).transpose(1, 2, 0)[:, :, ::-1] * 255)
             cv2.imwrite(arguments_strOut, imgt_png)
             # wx.CallAfter(Publisher().sendMessage, 'update', '')
 
@@ -294,7 +310,8 @@ def main(interp : int, input_file : str):
     # os.system("ffmpeg -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system(str(ffmpeg_exe) + " -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system(str(ffmpeg_exe) + " -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -vcodec libx264 -profile:v high444 -refs 16 -crf 0 -preset ultrafast output.mp4")
-    os.system(str(ffmpeg_exe) + " -f image2 -framerate " + str(interp*fps) + " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
+    os.system(str(ffmpeg_exe) + " -f image2 -framerate " + str(interp*fps) +
+              " -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("ffmpeg -f image2 -i .\\" + dir_path + "\\%010d.png -pix_fmt yuv420p output.mp4")
     # os.system("rm -rf %s" % dir_path)
     shutil.rmtree(dir_path)
@@ -302,5 +319,3 @@ def main(interp : int, input_file : str):
 
 
 # main()
-
-
