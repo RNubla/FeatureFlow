@@ -206,7 +206,8 @@ class BDCN(nn.Module):
                 if 'bias' in name:
                     param.zero_()
                 else:
-                    nn.init.constant(param, 0.080)
+                    # nn.init.constant(param, 0.080)
+                    nn.init.constant_(param, 0.080)
             else:
                 if logger:
                     logger.info('init params %s ' % name)

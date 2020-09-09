@@ -128,7 +128,8 @@ class ExtractFeatures(nn.Module):
         self.net = torchvision.models.resnet50(pretrained=True)
         self.conv1_4in = nn.Conv2d(4, 64, kernel_size=(
             7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-        nn.init.xavier_uniform(self.conv1_4in.weight)
+        # nn.init.xavier_uniform(self.conv1_4in.weight)
+        nn.init.xavier_uniform_(self.conv1_4in.weight)
 
     def forward(self, x):
         output = self.conv1_4in(x)
